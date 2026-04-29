@@ -1,0 +1,47 @@
+{
+  "version": "0.2",
+  "claim": "In-app messaging is the highest-leverage growth lever for SimpleApp",
+  "audience": "pm-peers",
+  "depth": "standard",
+  "domain": "other",
+  "domain_maturity": "established",
+  "angles": [
+    {
+      "id": "01",
+      "name": "industry_competitive",
+      "instruction": "Survey 5+ peer content-feed products. What messaging features did they ship, what retention lift did they report?"
+    },
+    {
+      "id": "02",
+      "name": "internal_owners",
+      "instruction": "Who owns messaging at SimpleApp's parent org? What internal UXR exists on messaging engagement and churn correlation?"
+    },
+    {
+      "id": "03",
+      "name": "problem_framing",
+      "instruction": "Decompose 'growth lever' — what other levers exist (onboarding, push notifs, recommendation tuning)? How does messaging compare in opportunity size?"
+    },
+    {
+      "id": "04",
+      "name": "measurement",
+      "instruction": "How would we measure messaging's growth contribution? What A/B design? What's the leading indicator vs. lagging metric?"
+    },
+    {
+      "id": "05",
+      "name": "adjacent",
+      "instruction": "What new messaging tech (AI summarization, video DMs, etc.) is the domain not pricing in?"
+    },
+    {
+      "id": "06",
+      "name": "user_research",
+      "instruction": "What do user interviews / surveys say about messaging behavior on SimpleApp specifically? Where is the demand actually coming from — convenience, social pressure, content sharing?"
+    }
+  ],
+  "dive_folder": "~/projects/example-project/research/messaging_growth_lever",
+  "created_by": "synthetic",
+  "created_at": "2026-04-28",
+  "tool_health": {
+    "code_search": "ok",
+    "web_fetch": "ok"
+  }
+}

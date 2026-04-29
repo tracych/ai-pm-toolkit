@@ -1,0 +1,29 @@
+{
+  "name": "pm-deep-dive",
+  "version": "0.1.0",
+  "description": "Multi-agent PM research methodology: frame a falsifiable claim, run parallel agents across orthogonal angles, adversarially validate, synthesize with cross-validation, ship as post/exec brief, land into persistent project knowledge. Built for PMs ramping into a new domain or pressure-testing a strategic claim.",
+  "author": {
+    "name": "Tracy Chen"
+  },
+  "homepage": "https://github.com/tracych/ai-pm-toolkit/tree/main/pm-deep-dive",
+  "keywords": [
+    "pm",
+    "research",
+    "deep-dive",
+    "multi-agent",
+    "claim-validation",
+    "domain-ramp",
+    "triangulation"
+  ],
+  "commands": [
+    "./commands/pm-deep-dive.md",
+    "./commands/pm-dive-frame.md",
+    "./commands/pm-dive-run.md",
+    "./commands/pm-dive-summarize.md",
+    "./commands/pm-dive-ship.md",
+    "./commands/pm-dive-land.md"
+  ],
+  "skills": [
+    "./skills/pm-deep-dive/SKILL.md"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "version": "0.2",
+  "claim": "Sparse training signal (not model architecture or compute) is the binding constraint on Quality Model X's accuracy ceiling",
+  "audience": "leadership",
+  "depth": "deep",
+  "domain": "ads",
+  "domain_maturity": "established",
+  "angles": [
+    {
+      "id": "01",
+      "name": "industry_competitive",
+      "instruction": "Survey peer ML model teams (internal and external). Who has hit similar accuracy plateaus? What was the binding constraint they identified?"
+    },
+    {
+      "id": "02",
+      "name": "internal_owners",
+      "instruction": "Pull all Quality Model X experiment results from the past 4 quarters. Categorize by intervention type (architecture, compute, signal). What's the lift distribution per category?"
+    },
+    {
+      "id": "03",
+      "name": "problem_framing",
+      "instruction": "Decompose 'binding constraint' — could be data, architecture, compute, eval, or labeling. Map each to evidence pro/con."
+    },
+    {
+      "id": "04",
+      "name": "measurement",
+      "instruction": "What's the eval methodology for Quality Model X? Are we measuring the right thing? Could the plateau be a metric ceiling, not a model ceiling?"
+    },
+    {
+      "id": "05",
+      "name": "adjacent_tech",
+      "instruction": "What new signal sources or augmentation techniques (LLM-judged labels, weak supervision, distillation) is the team not yet using?"
+    },
+    {
+      "id": "06",
+      "name": "user_research",
+      "instruction": "What does UXR / qualitative interview data say about how end-users experience low-quality model outputs? Does any of it hint at the constraint type the model agents miss?"
+    }
+  ],
+  "dive_folder": "~/projects/example-project/research/sparse_signals_binding_constraint",
+  "created_by": "synthetic",
+  "created_at": "2026-04-28",
+  "tool_health": {
+    "code_search": "ok",
+    "web_fetch": "ok"
+  }
+}
