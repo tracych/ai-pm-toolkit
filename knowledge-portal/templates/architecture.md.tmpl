@@ -1,0 +1,57 @@
+# Knowledge base architecture
+
+> Why this KB is shaped the way it is. Read once when joining. Update if the shape changes.
+
+## The 10-topic frame
+
+Every topic in `knowledge/` answers a question a new team member asks in their first 30 days:
+
+| Topic | Question it answers |
+|---|---|
+| `domain_knowledge` | What is this domain? |
+| `systems_and_models` | What runs in production? |
+| `metrics_and_measurement` | What do we measure and why? |
+| `people_and_org` | Who does what? |
+| `processes_and_rituals` | How do decisions get made? |
+| `gotchas_and_tips` | What will burn me? |
+| `resources` | Where do I look for X? |
+| `skills` | What AI/automation skills do we use? |
+| `industry_landscape` | What's happening outside our team? |
+| `intake` | Where do proposed additions go? |
+
+If a question doesn't fit one of these, audit the question — usually it's a sub-question of one of the 10.
+
+## Three artifact lifecycles
+
+| Lifecycle | What's in it | Refresh cadence |
+|---|---|---|
+| **Topic** | Long-form curated content. Editorial voice. | Quarterly review |
+| **Deep dive** | One-off investigation, frozen in time. | Tagged active/reference/archived |
+| **Explainer** | Per-subject self-contained HTML page. | Update when subject changes |
+
+The three should never duplicate each other. Topics summarize; deep dives investigate; explainers teach.
+
+## What's in `auto_discovery/`
+
+A light playbook for keeping the KB fresh: what to scan, how often, where findings land. If this KB is paired with `team-knowledge`, auto-discovery overlaps with `/brain-ingest` — pick one to be authoritative.
+
+## Build pipeline
+
+```
+knowledge/*.md ─┐
+deep_dives/*.md ├─→ build_portal.py → portal/index.html
+explainers/*.html ─┘
+```
+
+Zero dependencies. Stdlib python. One file out.
+
+## Why HTML (not a wiki engine)
+
+- **Portable** — works on any browser, any host, offline
+- **Versionable** — markdown source lives in git/drive next to other team artifacts
+- **No surprises** — no engine update breaks the layout
+- **Email-able** — `index.html` works as an attachment
+
+## When to migrate away
+
+If you outgrow the structure (>50 topics worth keeping, >100 explainers), it's time for a real CMS. This pattern is sized for teams of ~5-50 people with ~50-100 pages of durable content. Beyond that, the single-file portal stops paying off.

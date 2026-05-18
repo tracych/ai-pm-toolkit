@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Portal</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --panel: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --border: #e5e7eb;
+    --code-bg: #f3f4f6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+  }
+  .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  nav.side {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 24px 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.side h1 { font-size: 16px; margin: 0 0 4px 0; }
+  nav.side .subtitle { color: var(--muted); font-size: 12px; margin-bottom: 18px; }
+  nav.side h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 22px 0 6px 0;
+  }
+  nav.side ul { list-style: none; margin: 0; padding: 0; }
+  nav.side li { margin: 0; }
+  nav.side a {
+    display: block;
+    padding: 5px 8px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: 4px;
+  }
+  nav.side a:hover { background: var(--code-bg); }
+  nav.side a.active { background: var(--accent); color: white; }
+  main {
+    padding: 36px 48px;
+    max-width: 880px;
+  }
+  main .toolbar {
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  main input[type="search"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--panel);
+  }
+  main .meta {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .kb-section {
+    display: none;
+    padding-bottom: 60px;
+    border-bottom: 1px solid var(--border);
+  }
+  .kb-section.active { display: block; }
+  h1, h2, h3, h4 { line-height: 1.25; }
+  h1 { font-size: 28px; margin-top: 0; }
+  h2 { font-size: 20px; margin-top: 32px; }
+  h3 { font-size: 16px; margin-top: 24px; }
+  h4 { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 14px 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 13px;
+  }
+  pre code { background: none; padding: 0; }
+  blockquote {
+    border-left: 3px solid var(--border);
+    margin: 16px 0;
+    padding: 4px 0 4px 16px;
+    color: var(--muted);
+  }
+  .kb-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .kb-table th, .kb-table td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .kb-table th { background: var(--code-bg); font-weight: 600; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 32px 0; }
+  footer {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 32px 0 12px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  @media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.side { position: static; height: auto; }
+    main { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="side">
+    <h1>Knowledge Portal</h1>
+    <div class="subtitle">11 topics · 1 deep dives · 1 explainers</div>
+
+    <h2>Topics</h2>
+    <ul id="nav-topics"><li><a href="#topic-domain_knowledge" data-target="topic-domain_knowledge">Domain knowledge</a></li>
+<li><a href="#topic-systems_and_models" data-target="topic-systems_and_models">Systems and models</a></li>
+<li><a href="#topic-metrics_and_measurement" data-target="topic-metrics_and_measurement">Metrics and measurement</a></li>
+<li><a href="#topic-people_and_org" data-target="topic-people_and_org">People and org</a></li>
+<li><a href="#topic-processes_and_rituals" data-target="topic-processes_and_rituals">Processes and rituals</a></li>
+<li><a href="#topic-gotchas_and_tips" data-target="topic-gotchas_and_tips">Gotchas and tips</a></li>
+<li><a href="#topic-resources" data-target="topic-resources">Resources</a></li>
+<li><a href="#topic-skills" data-target="topic-skills">Skills</a></li>
+<li><a href="#topic-industry_landscape" data-target="topic-industry_landscape">Industry landscape</a></li>
+<li><a href="#topic-intake" data-target="topic-intake">Intake</a></li>
+<li><a href="#topic-conflict_log" data-target="topic-conflict_log">Conflict log</a></li></ul>
+
+    <h2>Deep dives</h2>
+    <ul id="nav-deep"><li><a href="#deep-candidate_dedup_investigation" data-target="deep-candidate_dedup_investigation">Deep dive: candidate dedup investigation</a></li></ul>
+
+    <h2>Explainers</h2>
+    <ul id="nav-explainers"><li><a href="explainers/two-tower-retrieval.html" target="_blank">Two Tower Retrieval ↗</a></li></ul>
+  </nav>
+
+  <main>
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search topics (Ctrl/⌘+K)…" autocomplete="off">
+      <span class="meta">Built 2026-05-18 20:35 UTC</span>
+    </div>
+
+    <section id="topic-domain_knowledge" class="kb-section"><h1 id="domain-knowledge">Domain knowledge</h1>
+<blockquote>What Shoplit Recommendations is, the vocabulary, and the user we serve. Read this first.</blockquote>
+<h2 id="what-we-do">What we do</h2>
+<p>Shoplit Recommendations powers two surfaces inside the Shoplit shopping app: the "for you" feed on the home tab, and the "similar items" rail on every product page. We rank products from the catalog (~12M SKUs) to maximize the probability the user adds something to cart and checks out.</p>
+<h2 id="who-the-user-is">Who the user is</h2>
+<p>The Shoplit user is mobile-first, comes 2-4 times per week, browses 4-6 products per session, and buys once every 8-10 sessions. They have an implicit query (sometimes — "I'm shopping for shoes today") and an explicit history (always — what they've viewed and bought).</p>
+<h2 id="what-we-re-not">What we're not</h2>
+<ul>
+<li>We're not search — search is a sibling team that handles explicit queries.</li>
+<li>We're not ads — ads is a separate ranker downstream of us.</li>
+<li>We're not merchandising — promoted product placements are determined by the merchandising team, not by our model.</li>
+</ul>
+<h2 id="key-vocabulary">Key vocabulary</h2>
+<table class="kb-table">
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>For-you feed</strong></td><td>Home-tab personalized product stream</td></tr>
+<tr><td><strong>Similar rail</strong></td><td>Product-detail-page horizontal scroll of related items</td></tr>
+<tr><td><strong>Candidate generation</strong></td><td>First-stage retrieval (~10K → ~500 items)</td></tr>
+<tr><td><strong>Re-ranker</strong></td><td>Second-stage scorer (~500 → final top-50)</td></tr>
+<tr><td><strong>Cold-start user</strong></td><td>&lt;5 sessions of history</td></tr>
+<tr><td><strong>Cold-start item</strong></td><td>&lt;30 days in catalog, &lt;100 impressions</td></tr>
+<tr><td><strong>HHI (category)</strong></td><td>Herfindahl index over categories in a recommended slate; lower = more diverse</td></tr>
+<tr><td><strong>CTR-attributed</strong></td><td>Click that led to a checkout within 7 days</td></tr>
+</tbody></table>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-04</td><td>"Similar rail" now contextual to scroll history, not just current item</td><td>First-step toward session re-ranker</td></tr>
+<tr><td>2026-03</td><td>For-you feed switched from infinite scroll to 50-item slate</td><td>Better A/B measurement, lower infra cost</td></tr>
+</tbody></table>
+<h2 id="open-questions">Open questions</h2>
+<ul>
+<li>Should "for-you" and "similar rail" share a model, or stay separate? Current: separate. Pressure to unify is growing.</li>
+<li>Cold-start strategy — currently fallback to popularity. Worth investing in a tenure-conditioned retrieval?</li>
+</ul>
+<hr>
+<p><em>Maintainer: rwest</em> <em>Last reviewed: 2026-05-15</em></p></section>
+<section id="topic-systems_and_models" class="kb-section"><h1 id="systems-and-models">Systems and models</h1>
+<blockquote>What's in production today. How the pieces fit together. Where the wires are.</blockquote>
+<h2 id="explainers">Explainers</h2>
+<ul>
+<li><a href="../portal/explainers/two-tower-retrieval.html">Two-tower retrieval</a></li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre><code>request → candidate generator → re-ranker → diversity rebalancer → response
+            (top ~500)             (top ~100)     (top 50)
+</code></pre>
+<p>Three stages, three different models, three different teams' work shows up at each.</p>
+<h2 id="candidate-generator">Candidate generator</h2>
+<table class="kb-table">
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td>Status</td><td>v1 in production, v2 in training</td></tr>
+<tr><td>Type</td><td>v1: co-visitation graph. v2: two-tower neural retrieval</td></tr>
+<tr><td>Owner</td><td>mchen (v2), dpark (v1 maintenance)</td></tr>
+<tr><td>Latency</td><td>v1: ~40ms. v2 target: &lt;60ms</td></tr>
+<tr><td>Notes</td><td>v2 launch target is mid-June. v1 stays online for control arm during A/B.</td></tr>
+</tbody></table>
+<h2 id="re-ranker">Re-ranker</h2>
+<table class="kb-table">
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td>Status</td><td>Sessionless v1 in production. Session-aware v2 in design</td></tr>
+<tr><td>Type</td><td>Gradient-boosted (LightGBM), 142 features</td></tr>
+<tr><td>Owner</td><td>dpark</td></tr>
+<tr><td>Latency</td><td>~80ms</td></tr>
+<tr><td>Notes</td><td>Session re-ranker (v2) limited to top-50 candidates only — full-slate re-rank busted p95.</td></tr>
+</tbody></table>
+<h2 id="diversity-rebalancer">Diversity rebalancer</h2>
+<table class="kb-table">
+<thead><tr><th></th><th></th></tr></thead>
+<tbody>
+<tr><td>Status</td><td>Stable, rarely touched</td></tr>
+<tr><td>Type</td><td>Greedy MMR-style rebalancing for category HHI</td></tr>
+<tr><td>Owner</td><td>rwest (no active maintainer)</td></tr>
+<tr><td>Latency</td><td>&lt;10ms</td></tr>
+<tr><td>Notes</td><td>Tuned for HHI ≤ 0.25 (lower = more diverse). Hard guardrail.</td></tr>
+</tbody></table>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-05-16</td><td>Stale candidate cache invalidation fix (PR #475)</td><td>Caused recurring p99 spikes</td></tr>
+<tr><td>2026-05-10</td><td>Two-tower training script committed (PR #471)</td><td>First infra for v2</td></tr>
+<tr><td>2026-04-30</td><td>Diversity threshold tightened from 0.30 → 0.25</td><td>UXR feedback on "same-store" feeling</td></tr>
+</tbody></table>
+<h2 id="open-questions">Open questions</h2>
+<ul>
+<li>Should v2 candidate generator unify the for-you and similar-rail use cases? Currently both call into v1 with different inputs.</li>
+<li>Re-ranker server-side vs on-device — open with infra team.</li>
+</ul>
+<hr>
+<p><em>Maintainer: dpark</em> <em>Last reviewed: 2026-05-16</em></p></section>
+<section id="topic-metrics_and_measurement" class="kb-section"><h1 id="metrics-and-measurement">Metrics and measurement</h1>
+<blockquote>What we measure, what counts as a win, what we'll never sacrifice.</blockquote>
+<h2 id="north-star-metric">North-star metric</h2>
+<p><strong>Checkout-attributed CTR (for-you feed).</strong> A click counts if it leads to a checkout within 7 days. Target: 4.4% by EOQ3 (currently 4.1%).</p>
+<h2 id="secondary-supporting-metrics">Secondary / supporting metrics</h2>
+<table class="kb-table">
+<thead><tr><th>Metric</th><th>What it measures</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Session length</td><td>Time on home tab</td><td>Engagement proxy</td></tr>
+<tr><td>Repeat visit rate</td><td>DAU returning within 7d</td><td>Long-term satisfaction proxy</td></tr>
+<tr><td>Add-to-cart rate</td><td>Cart adds per impression</td><td>Intent indicator earlier than checkout</td></tr>
+<tr><td>Cold-start CTR</td><td>CTR for users with &lt;5 sessions</td><td>Watches for cold-start regression hidden by global numbers</td></tr>
+</tbody></table>
+<h2 id="guardrails-do-not-regress">Guardrails (do not regress)</h2>
+<table class="kb-table">
+<thead><tr><th>Guardrail</th><th>Bound</th><th>Action if breached</th></tr></thead>
+<tbody>
+<tr><td>Category diversity (HHI)</td><td>≤ 0.25</td><td>Block launch</td></tr>
+<tr><td>p95 retrieval latency</td><td>≤ 200ms</td><td>Block launch</td></tr>
+<tr><td>p99 retrieval latency</td><td>≤ 500ms</td><td>Investigate before launch</td></tr>
+<tr><td>New seller exposure</td><td>≥ 8% of impressions</td><td>Block launch (marketplace health)</td></tr>
+</tbody></table>
+<h2 id="a-b-framework">A/B framework</h2>
+<ul>
+<li>All launches go through 1% → 10% → 50% ramp</li>
+<li>Each step requires 7 days of data before promotion</li>
+<li>Minimum sample size per arm: 200K daily users</li>
+<li>Diversity / latency / new-seller guardrails read at every promotion</li>
+</ul>
+<h2 id="how-we-cut-metrics">How we cut metrics</h2>
+<p>Always cut by user tenure (cold-start vs returning). A global +2% CTR with a -8% cold-start CTR is a regression. The two-tower v2 eval is currently building this cut as a first-class part of the harness.</p>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-05-12</td><td>Eval cut by user tenure made mandatory in offline eval</td><td>Catch cold-start regressions earlier</td></tr>
+<tr><td>2026-04-15</td><td>Min sample size raised from 100K → 200K daily users per arm</td><td>Past two launches had noisy decisions at 100K</td></tr>
+</tbody></table>
+<h2 id="open-questions">Open questions</h2>
+<ul>
+<li>Do we have a satisfaction metric beyond CTR? UXR keeps asking. Survey-based, candidate is NPS-lite weekly pulse.</li>
+</ul>
+<hr>
+<p><em>Maintainer: rwest</em> <em>Last reviewed: 2026-05-15</em></p></section>
+<section id="topic-people_and_org" class="kb-section"><h1 id="people-and-org">People and org</h1>
+<blockquote>Who owns what. Who to ask. Decision authority.</blockquote>
+<h2 id="team">Team</h2>
+<table class="kb-table">
+<thead><tr><th>Person</th><th>Role</th><th>Owns</th><th>Best for questions about</th></tr></thead>
+<tbody>
+<tr><td>rwest</td><td>EM</td><td>Roadmap, prioritization, x-team</td><td>Strategy, dependencies, leadership escalation</td></tr>
+<tr><td>dpark</td><td>Tech lead</td><td>Re-ranker, latency, infra</td><td>Architecture, perf, on-call handoff</td></tr>
+<tr><td>mchen</td><td>Senior IC</td><td>Two-tower v2, eval</td><td>Modeling tradeoffs, eval design</td></tr>
+<tr><td>sotieno</td><td>IC</td><td>Candidate gen parity, feature plumbing</td><td>Feature pipelines, dataset questions</td></tr>
+</tbody></table>
+<h2 id="decision-authority">Decision authority</h2>
+<table class="kb-table">
+<thead><tr><th>Decision</th><th>Who decides</th><th>Who must sign off</th></tr></thead>
+<tbody>
+<tr><td>Model architecture</td><td>mchen (with dpark on perf implications)</td><td>rwest reviews</td></tr>
+<tr><td>Latency budget changes</td><td>dpark</td><td>rwest + infra partner</td></tr>
+<tr><td>Metric definition changes</td><td>rwest</td><td>DS partner</td></tr>
+<tr><td>Launch / hold</td><td>rwest</td><td>DS partner (statistical), infra (perf)</td></tr>
+<tr><td>Cold-start strategy</td><td>rwest</td><td>UXR partner</td></tr>
+</tbody></table>
+<p>Anything not on this list defaults to "the most senior IC closest to the work."</p>
+<h2 id="partner-teams">Partner teams</h2>
+<table class="kb-table">
+<thead><tr><th>Team</th><th>Why we work with them</th><th>Primary contact</th></tr></thead>
+<tbody>
+<tr><td>Search</td><td>Our queries downstream feed their candidate set</td><td>their PM</td></tr>
+<tr><td>Ads ranking</td><td>Our output is their input</td><td>their TL</td></tr>
+<tr><td>Catalog</td><td>They own the SKU metadata we depend on</td><td>their PM</td></tr>
+<tr><td>Infra (serving)</td><td>They run the inference layer</td><td>their EM</td></tr>
+<tr><td>UXR</td><td>User satisfaction beyond CTR</td><td>our embedded researcher</td></tr>
+<tr><td>Data Science</td><td>Experiment readouts</td><td>rwest's DS partner</td></tr>
+</tbody></table>
+<h2 id="skip-level-chain">Skip-level + chain</h2>
+<p>rwest → engineering director (skip) → VP eng</p>
+<p>Skip-level is open for any IC; book directly.</p>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-04</td><td>sotieno joined from infra team</td><td>Backfill from previous IC departure</td></tr>
+<tr><td>2026-03</td><td>Embedded UXR researcher added</td><td>Investing in non-CTR satisfaction signal</td></tr>
+</tbody></table>
+<h2 id="open-questions">Open questions</h2>
+<ul>
+<li>Should we have a dedicated PM? Currently rwest covers both EM and PM. Decision pending hiring approval.</li>
+</ul>
+<hr>
+<p><em>Maintainer: rwest</em> <em>Last reviewed: 2026-05-15</em></p></section>
+<section id="topic-processes_and_rituals" class="kb-section"><h1 id="processes-and-rituals">Processes and rituals</h1>
+<blockquote>How decisions get made. The cadence of the week. Where the trains run.</blockquote>
+<h2 id="weekly-cadence">Weekly cadence</h2>
+<table class="kb-table">
+<thead><tr><th>Day</th><th>Ritual</th><th>Owner</th><th>Output</th></tr></thead>
+<tbody>
+<tr><td>Mon</td><td>Sprint planning (30 min)</td><td>rwest</td><td>This week's commits</td></tr>
+<tr><td>Tue/Thu</td><td>Eng standup async in chat (no meeting)</td><td>self-serve</td><td>Yesterday/today/blockers</td></tr>
+<tr><td>Wed</td><td>Eng review (1 hr, optional)</td><td>dpark</td><td>Design feedback for in-flight work</td></tr>
+<tr><td>Fri</td><td>Demo + retro (45 min)</td><td>rotates</td><td>Shipped work + improvements</td></tr>
+</tbody></table>
+<h2 id="release-cadence">Release cadence</h2>
+<ul>
+<li>Master is always deployable</li>
+<li>Cuts on Mon/Wed/Fri at 14:00 local</li>
+<li>Hotfixes can cut any time with on-call approval</li>
+<li>Major model launches go through the A/B ramp ladder (see metrics_and_measurement.md)</li>
+</ul>
+<h2 id="how-decisions-get-made">How decisions get made</h2>
+<p>Three flavors:</p>
+<ol>
+<li><strong>Reversible / low-stakes</strong> — IC decides. Document in PR description.</li>
+<li><strong>Reversible / high-stakes</strong> — IC writes a 1-pager. EM + tech lead sign off async in chat. 48h turnaround.</li>
+<li><strong>Irreversible / high-stakes</strong> — Design doc, x-team review, EM and skip-level sign off.</li>
+</ol>
+<p>If unsure which flavor, default up one level.</p>
+<h2 id="on-call">On-call</h2>
+<ul>
+<li>Weekly rotation, Mon-Mon, all eng</li>
+<li>Primary handles pages, secondary covers if primary unreachable</li>
+<li>New on-call gets a shadow week before solo</li>
+<li>Pages above sev-3 trigger incident review the following Wed</li>
+</ul>
+<h2 id="retro-format">Retro format</h2>
+<p>Every other week. Three questions:</p>
+<ol>
+<li>What worked?</li>
+<li>What didn't?</li>
+<li>What's one thing we'll try differently?</li>
+</ol>
+<p>Action items have an owner and a date. Reviewed at next retro.</p>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-04</td><td>Standup moved from sync to async in chat</td><td>Saved 2 hrs/wk per IC, no decision quality loss</td></tr>
+<tr><td>2026-03</td><td>Eng review made optional (was mandatory)</td><td>Reduced meeting load; quality improved (only show up if you need feedback)</td></tr>
+</tbody></table>
+<h2 id="open-questions">Open questions</h2>
+<ul>
+<li>Bi-weekly retro is currently coupled to sprint. Should retro be monthly instead? Some ICs feel it's too frequent.</li>
+</ul>
+<hr>
+<p><em>Maintainer: rwest</em> <em>Last reviewed: 2026-05-15</em></p></section>
+<section id="topic-gotchas_and_tips" class="kb-section"><h1 id="gotchas-and-tips">Gotchas and tips</h1>
+<blockquote>The "I wish someone had told me" file. The most valuable page in the KB. Read every couple of weeks.</blockquote>
+<h2 id="modeling">Modeling</h2>
+<ul>
+<li><strong>Don't trust global CTR cuts.</strong> A +2% global with -8% cold-start is a regression. Always cut by user tenure.</li>
+<li><strong>Candidate cache stales silently.</strong> TTL is 12 hours but invalidation paths have failed historically (see PR #475). If retrieval starts looking weird, check cache age first.</li>
+<li><strong>Two-tower scores aren't comparable across runs.</strong> Training stochasticity. Always compare within-run; for cross-run, use ranking-based metrics (NDCG, MRR).</li>
+<li><strong>Diversity rebalancer can hide a bad re-ranker.</strong> A re-ranker producing 10 same-category items will <em>look</em> fine in the final slate because the rebalancer fixes it. Always eval the re-ranker output <em>before</em> rebalancing.</li>
+</ul>
+<h2 id="infra-serving">Infra / serving</h2>
+<ul>
+<li><strong>p99 retrieval is the canary.</strong> Watch it.</li>
+<li><strong>GPU memory leaks happen on every restart for 5-10 minutes.</strong> Don't deploy mid-business-hours; deploy at 02:00 local.</li>
+<li><strong>Feature pipeline lag is real.</strong> A "new" feature in the offline data may be 6 hours stale in serving. Always check pipeline lag dashboard before A/B reads.</li>
+</ul>
+<h2 id="process">Process</h2>
+<ul>
+<li><strong>The async standup in chat is the source of truth for blockers.</strong> If you only mention a blocker in DM with the EM, it won't get unblocked.</li>
+<li><strong>Eng review on Wed is optional but underused.</strong> If you're stuck on a design choice, bring it. The empty room is more your problem than ours.</li>
+<li><strong>"Reversible" decisions can become irreversible</strong> once they're in production for 30 days (users adapt). Categorize before launch, not after.</li>
+</ul>
+<h2 id="communication">Communication</h2>
+<ul>
+<li><strong>Don't ping infra in our chat space; they have their own.</strong> Tag the infra partner in their channel.</li>
+<li><strong>Leadership wants weekly deltas, not weekly status.</strong> "We shipped X" is not interesting; "We shipped X <em>and</em> it moved Y by Z%" is.</li>
+</ul>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-05-16</td><td>Candidate cache gotcha added</td><td>After PR #475 fix; want future maintainer to know the failure mode</td></tr>
+<tr><td>2026-04-22</td><td>Async standup gotcha added</td><td>Two ICs got stuck for &gt;1 week on blockers only mentioned in DM</td></tr>
+</tbody></table>
+<hr>
+<p><em>Maintainer: dpark</em> <em>Last reviewed: 2026-05-16</em></p></section>
+<section id="topic-resources" class="kb-section"><h1 id="resources">Resources</h1>
+<blockquote>Canonical links. Top dashboards, key docs, runbooks. Curated — not exhaustive.</blockquote>
+<h2 id="dashboards">Dashboards</h2>
+<table class="kb-table">
+<thead><tr><th>Dashboard</th><th>What it shows</th><th>When to use</th></tr></thead>
+<tbody>
+<tr><td>Daily CTR (for-you)</td><td>Top-line CTR + guardrails by hour</td><td>First thing every morning; before/after every launch</td></tr>
+<tr><td>A/B experiment dashboard</td><td>Live experiment readouts</td><td>Promotion decisions</td></tr>
+<tr><td>Retrieval latency p50/p95/p99</td><td>Latency by stage and model</td><td>Pages; weekly capacity review</td></tr>
+<tr><td>Cold-start segment cuts</td><td>CTR by user tenure bucket</td><td>Before any launch decision</td></tr>
+<tr><td>New seller exposure</td><td>% impressions from sellers &lt;30d in catalog</td><td>Marketplace health guardrail</td></tr>
+</tbody></table>
+<p>(Placeholder URLs — replace with your own.)</p>
+<h2 id="docs">Docs</h2>
+<table class="kb-table">
+<thead><tr><th>Doc</th><th>Owner</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Team roadmap (Q3)</td><td>rwest</td><td>What we're committing to</td></tr>
+<tr><td>Re-ranker design doc</td><td>dpark</td><td>Architecture + tradeoffs of v2</td></tr>
+<tr><td>Eval harness spec</td><td>mchen</td><td>Offline eval methodology</td></tr>
+<tr><td>Incident runbook</td><td>dpark</td><td>What to do during a page</td></tr>
+</tbody></table>
+<h2 id="wikis-collections">Wikis / collections</h2>
+<ul>
+<li>Shoplit Recommendations team wiki space</li>
+<li>Cross-team rec systems guild (monthly)</li>
+<li>Shoplit experimentation handbook</li>
+</ul>
+<h2 id="external-reading-worth-bookmarking">External reading worth bookmarking</h2>
+<ul>
+<li>"Two-tower neural networks for retrieval" — recent survey paper</li>
+<li>"Calibration of personalized rankers" — ICML 2025</li>
+<li>Industry blog posts from peer rec teams (curated quarterly in <code>industry_landscape.md</code>)</li>
+</ul>
+<h2 id="on-call">On-call</h2>
+<ul>
+<li>On-call schedule (this week + 4 weeks ahead)</li>
+<li>Page severity definitions</li>
+<li>Escalation tree</li>
+</ul>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-05</td><td>Cold-start segment dashboard added</td><td>Required for eval cut-by-tenure</td></tr>
+<tr><td>2026-04</td><td>Removed 4 stale dashboards from this list</td><td>Hadn't been opened in 90d</td></tr>
+</tbody></table>
+<hr>
+<p><em>Maintainer: rotates monthly</em> <em>Last reviewed: 2026-05-10</em></p></section>
+<section id="topic-skills" class="kb-section"><h1 id="skills">Skills</h1>
+<blockquote>AI/automation skills the team uses. Slash commands, shared prompts, agents. The "what tools do we have" page.</blockquote>
+<h2 id="shared-slash-commands">Shared slash commands</h2>
+<table class="kb-table">
+<thead><tr><th>Command</th><th>What it does</th><th>Owner</th></tr></thead>
+<tbody>
+<tr><td><code>/team-status</code></td><td>Pulls the last week of activity per team member into a summary</td><td>dpark</td></tr>
+<tr><td><code>/eval-readout</code></td><td>Drafts an A/B readout from raw experiment data</td><td>mchen</td></tr>
+<tr><td><code>/incident-summary</code></td><td>Generates a sev review template from a page transcript</td><td>dpark</td></tr>
+<tr><td><code>/spec-skeleton</code></td><td>Drops a design-doc skeleton with our standard sections</td><td>rwest</td></tr>
+</tbody></table>
+<h2 id="shared-prompts">Shared prompts</h2>
+<p>Lives in the team's prompt library (linked in <code>resources.md</code>). The four that get reused most:</p>
+<table class="kb-table">
+<thead><tr><th>Prompt</th><th>When to use</th></tr></thead>
+<tbody>
+<tr><td>"Adversarial design review"</td><td>Before posting a design doc — paste, get devil's-advocate critique</td></tr>
+<tr><td>"PR description from diff"</td><td>Generate first-draft PR description from a unified diff</td></tr>
+<tr><td>"Standup phrasing"</td><td>Compress a paragraph of standup into 2-3 bullets</td></tr>
+<tr><td>"Stakeholder-friendly explainer"</td><td>Convert a technical note into a non-engineer-readable version</td></tr>
+</tbody></table>
+<h2 id="agents">Agents</h2>
+<p>We use one MCP server: a read-only one that exposes our experiment platform. Used inside <code>/eval-readout</code> to pull metric deltas. No write paths — safer that way.</p>
+<h2 id="what-s-not-on-this-page">What's NOT on this page</h2>
+<ul>
+<li>Personal productivity prompts (use yourself, don't centralize)</li>
+<li>One-off scripts for specific projects (live in the project folder, not here)</li>
+<li>External AI products we use as humans (ChatGPT, Claude.ai, etc.) — those aren't team skills</li>
+</ul>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-05</td><td>Added <code>/eval-readout</code></td><td>Replaced a manual checklist that was taking ~2 hrs/launch</td></tr>
+<tr><td>2026-04</td><td>Retired the "Slack TL;DR" slash command</td><td>Generated summaries that nobody read</td></tr>
+</tbody></table>
+<h2 id="open-questions">Open questions</h2>
+<ul>
+<li>Should we standardize on a single model for shared prompts? Currently mixed.</li>
+</ul>
+<hr>
+<p><em>Maintainer: rwest</em> <em>Last reviewed: 2026-05-10</em></p></section>
+<section id="topic-industry_landscape" class="kb-section"><h1 id="industry-landscape">Industry landscape</h1>
+<blockquote>What's happening outside our team that's worth knowing. Curated quarterly. Resist noise.</blockquote>
+<h2 id="recent-peer-team-moves">Recent peer-team moves</h2>
+<table class="kb-table">
+<thead><tr><th>Team / Company</th><th>Move</th><th>Why we care</th></tr></thead>
+<tbody>
+<tr><td>Peer rec team A</td><td>Launched a session-aware re-ranker in Q1</td><td>Validates our v2 direction</td></tr>
+<tr><td>Peer rec team B</td><td>Public talk on two-tower retrieval scaling</td><td>Useful reference for our v2 infra</td></tr>
+<tr><td>Internal Search team</td><td>Migrating their candidate generator to neural retrieval</td><td>We may converge architectures eventually</td></tr>
+</tbody></table>
+<h2 id="research-worth-reading">Research worth reading</h2>
+<table class="kb-table">
+<thead><tr><th>Paper / post</th><th>What it's about</th><th>Why us</th></tr></thead>
+<tbody>
+<tr><td>ICML 2025 paper on calibration of personalized rankers</td><td>Shows our diversity rebalancer is doing more work than we think</td><td>Maybe we can simplify by training calibration in</td></tr>
+<tr><td>KDD 2024 tutorial on cold-start retrieval</td><td>Tenure-conditioned retrieval techniques</td><td>Directly relevant to our open question</td></tr>
+<tr><td>Industry blog: scaling two-tower to billions of items</td><td>Practical sharding patterns</td><td>mchen reviewing for v2 launch readiness</td></tr>
+</tbody></table>
+<h2 id="regulatory-market-context">Regulatory / market context</h2>
+<table class="kb-table">
+<thead><tr><th>Item</th><th>Date</th><th>Impact</th></tr></thead>
+<tbody>
+<tr><td>New regional disclosure rules on personalized ranking</td><td>2026-04</td><td>Need to verify our impression logging meets the bar</td></tr>
+<tr><td>Industry-wide push for "explainable why this item" surfaces</td><td>trend</td><td>Roadmap item Q4 — currently not committed</td></tr>
+</tbody></table>
+<h2 id="things-that-have-changed-recently">Things that have changed recently</h2>
+<table class="kb-table">
+<thead><tr><th>Date</th><th>Change</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>2026-05</td><td>Removed 3 papers from the curated list</td><td>Hadn't been referenced in 6+ months</td></tr>
+</tbody></table>
+<h2 id="what-s-intentionally-not-here">What's intentionally NOT here</h2>
+<ul>
+<li>Full competitor analysis (lives in a separate quarterly deep dive)</li>
+<li>Every paper anyone has read (resist completionism — this list is for <em>recurring</em> references)</li>
+</ul>
+<hr>
+<p><em>Maintainer: mchen</em> <em>Last reviewed: 2026-05-01</em></p></section>
+<section id="topic-intake" class="kb-section"><h1 id="intake">Intake</h1>
+<blockquote>Proposed additions awaiting review. Same schema as the <code>team-knowledge</code> plugin's <code>intake.md</code> — <code>Target</code> here is a topic file (<code>systems_and_models</code>, <code>metrics_and_measurement</code>, etc.); in the team brain it's a section of CLAUDE.md.</blockquote>
+<h2 id="proposed-additions">Proposed additions</h2>
+<table class="kb-table">
+<thead><tr><th>Confidence</th><th>Target</th><th>Entry</th><th>Source</th><th>Validator verdict</th><th>Detected</th></tr></thead>
+<tbody>
+<tr><td>HIGH</td><td>systems_and_models</td><td>"Diversity rebalancer can hide a bad re-ranker." Add to gotchas instead?</td><td>dpark internal note</td><td>CONFIRMED (matches eval observation)</td><td>2026-05-14</td></tr>
+<tr><td>MED</td><td>metrics_and_measurement</td><td>"Consider deprecating add-to-cart rate — checkout-attributed CTR is strictly better"</td><td>rwest in eng review</td><td>UNFOUND (no analysis attached)</td><td>2026-05-13</td></tr>
+<tr><td>LOW</td><td>industry_landscape</td><td>"Peer team C may be hiring; signals possible re-org"</td><td>hallway conversation</td><td>UNFOUND</td><td>2026-05-12</td></tr>
+</tbody></table>
+<h2 id="proposed-updates">Proposed updates</h2>
+<table class="kb-table">
+<thead><tr><th>Confidence</th><th>Target</th><th>Before</th><th>After</th><th>Source</th><th>Validator verdict</th><th>Detected</th></tr></thead>
+<tbody>
+<tr><td>HIGH</td><td>gotchas_and_tips</td><td>"p99 retrieval is the canary"</td><td>"p99 retrieval is the canary, not p95. A regression shows up at p99 ~3 weeks before p95."</td><td>dpark from PR #475 retro</td><td>CONFIRMED (PR #475)</td><td>2026-05-16</td></tr>
+</tbody></table>
+<h2 id="manual-entries">Manual entries</h2></section>
+<section id="topic-conflict_log" class="kb-section"><h1 id="conflict-log">Conflict log</h1>
+<blockquote>Contradictions, never auto-resolved. Never compacted.</blockquote>
+<h2 id="open-conflicts">Open conflicts</h2>
+<table class="kb-table">
+<thead><tr><th>Detected</th><th>Topic</th><th>Claim A</th><th>Claim A source</th><th>Claim B</th><th>Claim B source</th><th>Resolution</th></tr></thead>
+<tbody>
+<tr><td>2026-05-15</td><td>Two-tower v2 launch target</td><td>"early June"</td><td>sotieno (standup chat)</td><td>"mid June"</td><td>dpark (design doc)</td><td>OPEN — needs rwest decision</td></tr>
+</tbody></table>
+<h2 id="resolved-conflicts">Resolved conflicts</h2>
+<table class="kb-table">
+<thead><tr><th>Detected</th><th>Resolved</th><th>Topic</th><th>Chosen claim</th><th>Rejected claim</th><th>Rationale</th></tr></thead>
+<tbody>
+<tr><td>2026-04-22</td><td>2026-04-25</td><td>Retrieval architecture v2</td><td>Two-tower</td><td>Single deep cross network</td><td>rwest decision 2026-05-02 — cheaper to serve, easier to A/B alongside v1</td></tr>
+<tr><td>2026-03-10</td><td>2026-03-12</td><td>Diversity threshold</td><td>0.25 (tighter)</td><td>0.30 (looser)</td><td>UXR feedback showed users perceived "same store" feeling at 0.30</td></tr>
+</tbody></table></section>
+<section id="deep-candidate_dedup_investigation" class="kb-section"><h1 id="deep-dive-candidate-dedup-investigation">Deep dive: candidate dedup investigation</h1>
+<p><strong>Status:</strong> archived <strong>Last updated:</strong> 2026-04-18 <strong>Originating question:</strong> Why does the v1 candidate generator return duplicate SKUs ~3% of the time?</p>
+<h2 id="summary-tl-dr">Summary (TL;DR)</h2>
+<ul>
+<li>v1 returns dup SKUs because co-visitation graph treats variant SKUs (color/size) as distinct nodes.</li>
+<li>Fix lives in dedup post-processing, not in the graph (graph rebuild is too expensive).</li>
+<li>~3% dup rate causes ~0.4% CTR drag — meaningful but not urgent. Folded into v2 design.</li>
+</ul>
+<h2 id="context">Context</h2>
+<p>After a UXR study flagged "I keep seeing the same shirt in different colors right next to each other," dpark and mchen ran a 2-week investigation. Goal: confirm whether the duplication was real, quantify, and decide if it warranted a v1 fix or could wait for v2.</p>
+<h2 id="what-we-found">What we found</h2>
+<ul>
+<li>HIGH: ~3% of candidate slates have ≥2 SKUs that share a parent product (color/size variants).</li>
+<li>HIGH: the co-visitation graph treats variant SKUs as distinct nodes — by design, since they have separate inventory.</li>
+<li>MED: ~0.4% CTR drag from the duplicates (estimated from a small-scale dedup A/B; sample size limited).</li>
+<li>LOW: users may <em>prefer</em> seeing variants sometimes (e.g. shoes — "show me the colors"). Not all duplicates are bad. Inconclusive from UXR.</li>
+</ul>
+<h2 id="what-we-didn-t-find">What we didn't find</h2>
+<ul>
+<li>Whether variant duplication helps in some categories (apparel) and hurts in others (electronics) — would need category-cut A/B.</li>
+</ul>
+<h2 id="implications">Implications</h2>
+<ul>
+<li>v1: implement dedup-by-parent-SKU as post-processing step. Low risk. (Shipped 2026-04-30 — PR #463.)</li>
+<li>v2 (two-tower): train with parent-SKU as a tie-breaker feature. Built into the eval harness as a new metric.</li>
+</ul>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>UXR study transcript</li>
+<li>A/B exp REC-A-2026-04-12</li>
+<li>Co-visitation graph code at services/recs/cvg/</li>
+</ul>
+<hr>
+<h2 id="archival-note">Archival note</h2>
+<p>Findings folded into <code>knowledge/systems_and_models.md</code> (v1 dedup) and <code>knowledge/metrics_and_measurement.md</code> (new dedup metric in eval). Keeping this dive for audit trail.</p></section>
+
+    <footer>
+      Generated by <a href="https://github.com/tracych/ai-pm-toolkit/tree/main/knowledge-portal">knowledge-portal</a>.
+      Single self-contained HTML. No CDN. Stdlib-only build.
+    </footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.kb-section'));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('nav.side a[data-target]'));
+  var search = document.getElementById('search');
+
+  function show(id) {
+    sections.forEach(function (s) { s.classList.toggle('active', s.id === id); });
+    navLinks.forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-target') === id); });
+    if (location.hash !== '#' + id) {
+      history.replaceState(null, '', '#' + id);
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  navLinks.forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      show(a.getAttribute('data-target'));
+    });
+  });
+
+  function initialShow() {
+    var hash = (location.hash || '').replace('#', '');
+    if (hash && document.getElementById(hash)) {
+      show(hash);
+    } else if (sections.length) {
+      show(sections[0].id);
+    }
+  }
+  initialShow();
+  window.addEventListener('hashchange', initialShow);
+
+  // simple in-page search: highlight matching sections in nav
+  function doSearch(q) {
+    q = (q || '').trim().toLowerCase();
+    navLinks.forEach(function (a) {
+      var target = a.getAttribute('data-target');
+      var sec = document.getElementById(target);
+      var hit = !q || (sec && sec.textContent.toLowerCase().indexOf(q) !== -1);
+      a.style.display = hit ? '' : 'none';
+    });
+  }
+  search.addEventListener('input', function () { doSearch(search.value); });
+
+  // Ctrl/⌘+K focuses search
+  document.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      search.focus();
+      search.select();
+    }
+  });
+})();
+</script>
+</body>
+</html>
