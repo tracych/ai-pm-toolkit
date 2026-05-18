@@ -1,0 +1,10 @@
+{
+  "name": "Shoplit Recommendations Brain",
+  "slug": "shoplit-recs",
+  "type": "team",
+  "created_at": "2026-04-28T15:00:00Z",
+  "created_by": "rwest",
+  "last_moderated_at": "2026-05-17T19:30:00Z",
+  "accepted_count": 18,
+  "rejected_count": 4
+}

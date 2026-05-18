@@ -1,0 +1,24 @@
+{
+  "name": "knowledge-portal",
+  "version": "0.1.0",
+  "description": "Curated markdown knowledge base + browsable HTML portal generator. Ten-topic structure (domain, systems, metrics, people, processes, gotchas, resources, skills, landscape, intake), with deep dives and per-subject explainers. Build to a single self-contained HTML portal — zero CDN, easy to host or email. Pairs with team-knowledge.",
+  "author": {
+    "name": "Tracy Chen"
+  },
+  "homepage": "https://github.com/tracych/ai-pm-toolkit/tree/main/knowledge-portal",
+  "keywords": [
+    "pm",
+    "knowledge-base",
+    "onboarding",
+    "documentation",
+    "static-site",
+    "portal",
+    "wiki"
+  ],
+  "commands": [
+    "./commands/portal-init.md",
+    "./commands/portal-build.md",
+    "./commands/portal-add-topic.md",
+    "./commands/portal-add-explainer.md"
+  ]
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two-tower retrieval</title>
+<style>
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; color: #1a1a1a; background: #fafafa; line-height: 1.6; }
+  .wrap { max-width: 720px; margin: 48px auto; padding: 0 24px; }
+  header { border-bottom: 1px solid #e5e7eb; margin-bottom: 32px; padding-bottom: 16px; }
+  header .audience { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; background: #f3f4f6; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px; }
+  h1 { font-size: 28px; margin: 0 0 6px 0; }
+  .subtitle { color: #6b7280; font-size: 14px; }
+  h2 { font-size: 18px; margin-top: 28px; }
+  h3 { font-size: 15px; }
+  code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em; }
+  pre { background: #f3f4f6; padding: 14px 16px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+  a { color: #2563eb; }
+  blockquote { border-left: 3px solid #e5e7eb; margin: 16px 0; padding: 4px 0 4px 16px; color: #6b7280; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
+  th, td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f3f4f6; }
+  footer { color: #6b7280; font-size: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="audience">XFN</span>
+    <h1>Two-tower retrieval</h1>
+    <div class="subtitle">systems_and_models · last updated 2026-05-12</div>
+  </header>
+
+  <article>
+    <h2>What it is</h2>
+    <p>A neural retrieval model that learns one embedding for the user and one embedding for the item, then ranks items by similarity to the user embedding.</p>
+
+    <h2>Why it matters</h2>
+    <p>The current candidate generator (v1) uses a co-visitation graph — items get linked when users view them in the same session. It's robust but it has two ceilings: it can't generalize to items with sparse history, and it can't use rich user features (tenure, category preference history, session signal).</p>
+    <p>Two-tower lifts both ceilings. It learns from the same view/purchase data v1 uses, but represents both sides as dense vectors, so items with thin history still get reasonable scores via similarity to similar items, and users get scored via similarity to similar users.</p>
+
+    <h2>How it works</h2>
+    <ul>
+      <li>Two neural networks ("towers") share no parameters. One takes user features; the other takes item features.</li>
+      <li>Each tower outputs a fixed-dimensional embedding (we use 128).</li>
+      <li>Similarity = dot product. Training objective: in-batch sampled softmax — push the positive item's score up vs random negatives.</li>
+      <li>At serving: precompute item embeddings for the entire catalog (offline, daily). At request time, run only the user tower (~ms) and find top-K nearest items via ANN.</li>
+      <li>ANN backend: HNSW with M=32, ef_search=64. Tradeoff knob: ef_search up = recall up, latency up.</li>
+    </ul>
+
+    <h2>Where it lives</h2>
+    <ul>
+      <li>Training: <code>services/recs/two_tower/train.py</code></li>
+      <li>Serving (user tower): <code>services/recs/two_tower/serving/</code></li>
+      <li>ANN index build: nightly job <code>recs-two-tower-ann-index</code></li>
+      <li>Eval harness: <code>services/recs/eval/harness.py</code> (NDCG@10 cut by user tenure)</li>
+    </ul>
+
+    <h2>Who owns it</h2>
+    <p>mchen (modeling, eval), dpark (serving, latency). rwest signs off on launch.</p>
+
+    <h2>Key tradeoffs</h2>
+    <table>
+      <thead><tr><th>Tradeoff</th><th>Our choice</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Embedding dim</td><td>128</td><td>256 was +0.4% NDCG, +30% serving latency — not worth it</td></tr>
+        <tr><td>Negative sampling</td><td>In-batch + uniform random</td><td>In-batch alone overfits to popular items</td></tr>
+        <tr><td>User tower input</td><td>Last 50 actions + tenure bucket + category prefs</td><td>Longer history was costly to fetch at serve time; 50 captures most signal</td></tr>
+        <tr><td>Item tower refresh</td><td>Daily</td><td>Item embeddings drift slowly; daily is fine, hourly would waste compute</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What you should NOT do</h2>
+    <ul>
+      <li><strong>Don't compare scores across training runs.</strong> Scores are not calibrated; only ranks within a run are meaningful.</li>
+      <li><strong>Don't bypass the ANN.</strong> Brute-force scoring against 12M items at request time will blow latency.</li>
+      <li><strong>Don't infer cold-start performance from global NDCG.</strong> Always look at the by-tenure cut.</li>
+      <li><strong>Don't add user features without consulting modeling.</strong> Every feature in the user tower adds serve-time fetch cost. Audit before adding.</li>
+    </ul>
+
+    <h2>How to learn more</h2>
+    <ul>
+      <li>Original Google paper: "Deep Neural Networks for YouTube Recommendations" (the two-tower idea, applied to retrieval)</li>
+      <li>Our team's design doc: <a href="#">Two-tower v2 design (link in resources.md)</a></li>
+      <li>mchen office hours: Thursdays 14:00</li>
+    </ul>
+  </article>
+
+  <footer>
+    Part of the <a href="../index.html">Knowledge Portal</a>. Self-contained — open offline, print, or attach to email.
+  </footer>
+</div>
+</body>
+</html>

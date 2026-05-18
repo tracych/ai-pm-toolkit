@@ -1,0 +1,27 @@
+{
+  "name": "team-knowledge",
+  "version": "0.1.0",
+  "description": "Build and maintain a self-validating team knowledge base. Source artifacts from your own data systems (chat, docs, code, tasks), roll them into per-contributor files, validate via cross-checking + adversarial prompts, and surface a curated team brain with human-in-the-loop moderation. Methodology + templates only — no third-party connectors.",
+  "author": {
+    "name": "Tracy Chen"
+  },
+  "homepage": "https://github.com/tracych/ai-pm-toolkit/tree/main/team-knowledge",
+  "keywords": [
+    "pm",
+    "em",
+    "team-brain",
+    "knowledge-base",
+    "auto-discovery",
+    "human-in-the-loop",
+    "memory",
+    "second-brain"
+  ],
+  "commands": [
+    "./commands/brain-init.md",
+    "./commands/brain-ingest.md",
+    "./commands/brain-evolve.md",
+    "./commands/brain-validate.md",
+    "./commands/brain-moderate.md",
+    "./commands/brain-query.md"
+  ]
+}

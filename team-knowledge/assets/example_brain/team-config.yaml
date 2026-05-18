@@ -1,0 +1,45 @@
+# Shoplit Recommendations — team brain config
+# Example file. Replace all identifiers with your real ones before use.
+
+team_name: "Shoplit Recommendations"
+team_slug: "shoplit-recs"
+manager_username: "rwest"
+
+stale_threshold_days: 14
+
+roster:
+  - name: "Rita West"
+    username: "rwest"
+    role: "EM"
+    sub_team: "core"
+
+  - name: "Diego Park"
+    username: "dpark"
+    role: "Tech Lead"
+    sub_team: "core"
+
+  - name: "Mira Chen"
+    username: "mchen"
+    role: "Senior IC"
+    sub_team: "ranking"
+
+  - name: "Sam Otieno"
+    username: "sotieno"
+    role: "IC"
+    sub_team: "retrieval"
+
+data_sources:
+  chat_space_id: "shoplit-recs-team"
+  task_system: "linear"
+  task_project_id: "REC"
+  code_repo: "shoplit/recommendations"
+  doc_drive_id: "fake-drive-folder-id"
+  wiki_space: "shoplit-recs"
+
+folders:
+  status_reports_folder_id: ""
+  contributors_folder_id: ""
+
+compaction_overrides:
+  # deliverables_days: 14    # default
+  # documents_days: 14       # default

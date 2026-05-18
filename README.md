@@ -28,6 +28,26 @@ Four gated phases: **Frame** (Jobs-to-be-Done) → **Flow** → **Design** → *
 
 Commands: `/protopilot [optional brief]`.
 
+### 🧠 [team-knowledge](./team-knowledge/)
+
+Build and maintain a self-validating team knowledge base. Methodology + templates only — no third-party connectors, so it works against any source stack you have.
+
+Source artifacts → per-contributor files (with declarative compaction) → cross-validation + adversarial validation → intake queue → human-on-the-loop moderation → curated team `CLAUDE.md`. Conflict tracking is first-class; nothing reaches the curated brain without going through moderation.
+
+**Use it when:** you want a team brain that captures decisions, blockers, and weekly signal without drift — and you want the structure to be portable across whichever chat/code/doc/task tools your team uses.
+
+Commands: `/brain-init`, `/brain-ingest`, `/brain-evolve`, `/brain-validate`, `/brain-moderate`, `/brain-query`.
+
+### 📚 [knowledge-portal](./knowledge-portal/)
+
+Curated markdown knowledge base + browsable HTML portal generator. Ten opinionated topics (domain, systems, metrics, people, processes, gotchas, resources, skills, landscape, intake), with deep dives and per-subject explainers. Builds to a **single self-contained `index.html`** — zero CDN, stdlib-only Python build, works offline, attaches to email.
+
+Pairs with `team-knowledge` — they share the same `intake.md` and `conflict_log.md` schemas so a current-state team brain and a durable knowledge base can stay in sync.
+
+**Use it when:** you want a portable knowledge surface for onboarding, stakeholder briefings, or cross-team handoffs — without a wiki engine or auth dance.
+
+Commands: `/portal-init`, `/portal-build`, `/portal-add-topic`, `/portal-add-explainer`.
+
 ---
 
 ## Install
@@ -39,8 +59,10 @@ cd ~/code
 git clone https://github.com/tracych/ai-pm-toolkit.git
 
 mkdir -p ~/.claude/plugins
-ln -s ~/code/ai-pm-toolkit/pm-deep-dive ~/.claude/plugins/pm-deep-dive
-ln -s ~/code/ai-pm-toolkit/protopilot   ~/.claude/plugins/protopilot
+ln -s ~/code/ai-pm-toolkit/pm-deep-dive     ~/.claude/plugins/pm-deep-dive
+ln -s ~/code/ai-pm-toolkit/protopilot       ~/.claude/plugins/protopilot
+ln -s ~/code/ai-pm-toolkit/team-knowledge   ~/.claude/plugins/team-knowledge
+ln -s ~/code/ai-pm-toolkit/knowledge-portal ~/.claude/plugins/knowledge-portal
 ```
 
 Restart Claude Code. Slash commands from each linked plugin will appear.
