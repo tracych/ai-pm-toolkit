@@ -53,13 +53,15 @@ Write to `intake.md`:
 
 ```markdown
 ## Proposed additions
-| Confidence | Section | Entry | Source contributors | Detected |
-|---|---|---|---|---|
+| Confidence | Target | Entry | Source | Validator verdict | Detected |
+|---|---|---|---|---|---|
 
 ## Proposed updates
-| Confidence | Section | Before | After | Source contributors | Detected |
-|---|---|---|---|---|---|
+| Confidence | Target | Before | After | Source | Validator verdict | Detected |
+|---|---|---|---|---|---|---|
 ```
+
+The `Target` column identifies the destination — a section name in `CLAUDE.md` (e.g. `Open Questions`, `Active Projects`, `This Week`).
 
 Print a summary:
 ```

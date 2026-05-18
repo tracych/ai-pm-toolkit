@@ -5,6 +5,9 @@ build_portal.py — render a knowledge base into a single self-contained HTML po
 Stdlib only. Run from the portal/ directory:
     python3 build_portal.py
 
+NOTE: this file is also copied into assets/example_kb/portal/ so the example KB
+is runnable standalone. Keep both copies in sync when editing.
+
 Inputs:
     ../knowledge/*.md                 → topic tabs
     ../knowledge/deep_dives/*.md      → deep-dives submenu
@@ -15,10 +18,8 @@ Output:
 """
 
 import re
-import os
 import sys
 import html
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -90,6 +91,18 @@ def md_to_html(text: str) -> str:
             out.append("</tbody></table>")
         in_table = False
         table_rows = []
+
+    def ensure_list(kind: str, depth: int):
+        # Pop deeper levels.
+        while len(list_stack) > depth + 1:
+            out.append(f"</{list_stack.pop()}>")
+        # If at the right depth but wrong kind, close + reopen.
+        if len(list_stack) == depth + 1 and list_stack[-1] != kind:
+            out.append(f"</{list_stack.pop()}>")
+        # Open missing levels.
+        while len(list_stack) < depth + 1:
+            list_stack.append(kind)
+            out.append(f"<{kind}>")
 
     def split_row(line: str):
         # strip leading/trailing pipe, split on |
@@ -165,12 +178,7 @@ def md_to_html(text: str) -> str:
         if m:
             flush_para()
             depth = len(m.group(1)) // 2
-            while len(list_stack) > depth + 1:
-                out.append(f"</{list_stack.pop()}>")
-            if not list_stack or list_stack[-1] != "ul" or len(list_stack) - 1 < depth:
-                while len(list_stack) < depth + 1:
-                    list_stack.append("ul")
-                    out.append("<ul>")
+            ensure_list("ul", depth)
             out.append(f"<li>{inline(m.group(2))}</li>")
             i += 1
             continue
@@ -180,12 +188,7 @@ def md_to_html(text: str) -> str:
         if m:
             flush_para()
             depth = len(m.group(1)) // 2
-            while len(list_stack) > depth + 1:
-                out.append(f"</{list_stack.pop()}>")
-            if not list_stack or list_stack[-1] != "ol" or len(list_stack) - 1 < depth:
-                while len(list_stack) < depth + 1:
-                    list_stack.append("ol")
-                    out.append("<ol>")
+            ensure_list("ol", depth)
             out.append(f"<li>{inline(m.group(2))}</li>")
             i += 1
             continue

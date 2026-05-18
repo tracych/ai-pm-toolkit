@@ -10,7 +10,7 @@ You can't ingest "everything." Auto-discovery picks a small set of signal-rich s
 
 | Source type | What to ingest | Bucket |
 |---|---|---|
-| Code review (GitHub, Phabricator, etc.) | Merged PRs/diffs authored or reviewed in window | Deliverables |
+| Code review (GitHub, GitLab, Gerrit, etc.) | Merged PRs/diffs authored or reviewed in window | Deliverables |
 | Task tracker (Linear, Jira, GitHub Issues) | Closed tasks assigned to user; opened tasks marked "blocker" | Deliverables / Blockers |
 | Chat (Slack, Teams, Google Chat) | Messages containing "decided", "we chose", "the call is", "blocker", "blocked on" | Decisions / Blockers |
 | Docs (Google Docs, Notion, Confluence) | Docs authored or substantially edited by user in window | Documents |

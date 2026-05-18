@@ -30,7 +30,7 @@ Two bets: (1) replace candidate generation co-visitation with a two-tower embedd
 ## This Week
 
 - Mira shipped offline eval harness for two-tower model (PR #482).
-- Diego closed retrieval p99 spike investigation — caused by stale candidate cache; mitigation rolled out.
+- Diego closed retrieval p99 spike investigation.
 - Sam completed feature parity check between v1 and v2 candidate generators.
 
 ## Active Projects
@@ -54,7 +54,7 @@ Two bets: (1) replace candidate generation co-visitation with a two-tower embedd
 | Person | Role | Focus | Last Active |
 |--------|------|-------|-------------|
 | rwest | EM | Roadmap, eng reviews | 2026-05-15 |
-| dpark | Tech Lead | Re-ranker design, latency | 2026-05-16 |
+| dpark | Tech Lead | Re-ranker design, latency | 2026-05-17 |
 | mchen | Senior IC | Two-tower model, eval harness | 2026-05-17 |
 | sotieno | IC | Candidate gen parity, feature work | 2026-05-15 |
 

@@ -11,7 +11,7 @@
 
 ## Infra / serving
 
-- **p99 retrieval is the canary, not p95.** A regression shows up at p99 ~3 weeks before it shows up at p95.
+- **p99 retrieval is the canary.** Watch it.
 - **GPU memory leaks happen on every restart for 5-10 minutes.** Don't deploy mid-business-hours; deploy at 02:00 local.
 - **Feature pipeline lag is real.** A "new" feature in the offline data may be 6 hours stale in serving. Always check pipeline lag dashboard before A/B reads.
 

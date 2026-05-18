@@ -19,7 +19,7 @@
 
 ## Companion: team-knowledge brain
 
-The `intake.md` and `conflict_log.md` here are shared with the team's [team-knowledge brain](https://github.com/tracych/ai-pm-toolkit/tree/main/team-knowledge). When the brain proposes a durable claim, it lands here; when it proposes a status update, it lands there.
+The [team-knowledge brain](https://github.com/tracych/ai-pm-toolkit/tree/main/team-knowledge) and this KB use the **same intake/conflict_log schema** so one moderator can review both with one mental model. The files themselves stay separate — the brain's intake is for team-status changes; this KB's intake is for durable knowledge additions.
 
 ## Build pipeline
 

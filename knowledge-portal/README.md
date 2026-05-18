@@ -95,7 +95,13 @@ If you have a wiki you like, keep it. This is for teams who want their knowledge
 
 ## Pair with `team-knowledge`
 
-The `intake.md` and `conflict_log.md` in this plugin mirror the same files in `team-knowledge`. If you use both, point them at the same files — durable knowledge gets curated here, current activity gets curated there.
+The two plugins solve different problems but use a **shared schema** for `intake.md` and `conflict_log.md`. Same column headers (`Target`, `Source`, `Validator verdict`, etc.) so one moderator can walk both with one mental model. The `Target` column identifies the destination — a topic file in the KB, a section of `CLAUDE.md` in the brain.
+
+Keep them as **two separate files** in two separate places — they're curated independently:
+- This plugin's intake → proposed additions to the durable knowledge base
+- `team-knowledge`'s intake → proposed additions to the current team status
+
+You can use either plugin independently.
 
 ---
 

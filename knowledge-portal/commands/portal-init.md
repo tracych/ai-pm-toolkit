@@ -31,8 +31,8 @@ Create:
 │   ├── resources.md
 │   ├── skills.md
 │   ├── industry_landscape.md
-│   ├── intake.md
-│   ├── conflict_log.md
+│   ├── intake.md                          # from templates/intake.md.tmpl
+│   ├── conflict_log.md                    # from templates/conflict_log.md.tmpl
 │   └── deep_dives/                        # empty — use /portal-add-explainer or hand-add
 ├── portal/
 │   ├── build_portal.py                    # copy from plugin's portal/build_portal.py
@@ -44,13 +44,13 @@ Create:
     └── auto_discovery_findings.md         # log of recent discovery passes
 ```
 
-For each topic markdown, fill in the topic name in the template and leave a `<!-- TODO: fill in -->` marker in each section.
+For each topic markdown, the template contains a `<TOPIC>` placeholder on the first line (and possibly elsewhere). Replace it with the topic's display name (e.g. `<TOPIC>` → `Domain knowledge` in `domain_knowledge.md`). Leave the `<!-- TODO: fill in -->` markers in each section so the user knows where to write.
 
-## Phase 2 — Wire to a team-knowledge brain (optional)
+## Phase 2 — Note about `team-knowledge` pairing (optional)
 
 Ask: "Are you also using the `team-knowledge` plugin?"
-- If YES — symlink (or just point) `knowledge/intake.md` and `knowledge/conflict_log.md` to the brain's files of the same name. Both plugins use the same schema.
-- If NO — keep the local copies.
+- If YES — keep this plugin's `knowledge/intake.md` and `knowledge/conflict_log.md` as **separate files** from the brain's. They use the same schema (one moderator, one mental model) but serve different purposes — this one is for durable knowledge additions, the brain's is for team-status updates.
+- If NO — no action needed; the local copies are the only ones.
 
 ## Phase 3 — Build the initial portal
 

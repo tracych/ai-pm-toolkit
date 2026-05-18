@@ -166,7 +166,7 @@
   <main>
     <div class="toolbar">
       <input type="search" id="search" placeholder="Search topics (Ctrl/⌘+K)…" autocomplete="off">
-      <span class="meta">Built 2026-05-18 19:32 UTC</span>
+      <span class="meta">Built 2026-05-18 20:35 UTC</span>
     </div>
 
     <section id="topic-domain_knowledge" class="kb-section"><h1 id="domain-knowledge">Domain knowledge</h1>
@@ -422,7 +422,7 @@
 </ul>
 <h2 id="infra-serving">Infra / serving</h2>
 <ul>
-<li><strong>p99 retrieval is the canary, not p95.</strong> A regression shows up at p99 ~3 weeks before it shows up at p95.</li>
+<li><strong>p99 retrieval is the canary.</strong> Watch it.</li>
 <li><strong>GPU memory leaks happen on every restart for 5-10 minutes.</strong> Don't deploy mid-business-hours; deploy at 02:00 local.</li>
 <li><strong>Feature pipeline lag is real.</strong> A "new" feature in the offline data may be 6 hours stale in serving. Always check pipeline lag dashboard before A/B reads.</li>
 </ul>
@@ -576,10 +576,10 @@
 <hr>
 <p><em>Maintainer: mchen</em> <em>Last reviewed: 2026-05-01</em></p></section>
 <section id="topic-intake" class="kb-section"><h1 id="intake">Intake</h1>
-<blockquote>Proposed additions awaiting review. Same schema as the <code>team-knowledge</code> plugin's <code>intake.md</code> — these two files can be the same file if you use both plugins.</blockquote>
+<blockquote>Proposed additions awaiting review. Same schema as the <code>team-knowledge</code> plugin's <code>intake.md</code> — <code>Target</code> here is a topic file (<code>systems_and_models</code>, <code>metrics_and_measurement</code>, etc.); in the team brain it's a section of CLAUDE.md.</blockquote>
 <h2 id="proposed-additions">Proposed additions</h2>
 <table class="kb-table">
-<thead><tr><th>Confidence</th><th>Topic</th><th>Entry</th><th>Source</th><th>Validator verdict</th><th>Detected</th></tr></thead>
+<thead><tr><th>Confidence</th><th>Target</th><th>Entry</th><th>Source</th><th>Validator verdict</th><th>Detected</th></tr></thead>
 <tbody>
 <tr><td>HIGH</td><td>systems_and_models</td><td>"Diversity rebalancer can hide a bad re-ranker." Add to gotchas instead?</td><td>dpark internal note</td><td>CONFIRMED (matches eval observation)</td><td>2026-05-14</td></tr>
 <tr><td>MED</td><td>metrics_and_measurement</td><td>"Consider deprecating add-to-cart rate — checkout-attributed CTR is strictly better"</td><td>rwest in eng review</td><td>UNFOUND (no analysis attached)</td><td>2026-05-13</td></tr>
@@ -587,9 +587,9 @@
 </tbody></table>
 <h2 id="proposed-updates">Proposed updates</h2>
 <table class="kb-table">
-<thead><tr><th>Confidence</th><th>Topic</th><th>Before</th><th>After</th><th>Source</th><th>Detected</th></tr></thead>
+<thead><tr><th>Confidence</th><th>Target</th><th>Before</th><th>After</th><th>Source</th><th>Validator verdict</th><th>Detected</th></tr></thead>
 <tbody>
-<tr><td>HIGH</td><td>gotchas_and_tips</td><td>"p99 retrieval is the canary"</td><td>"p99 retrieval is the canary, not p95. A regression shows up at p99 ~3 weeks before p95."</td><td>dpark from PR #475 retro</td><td>2026-05-16</td></tr>
+<tr><td>HIGH</td><td>gotchas_and_tips</td><td>"p99 retrieval is the canary"</td><td>"p99 retrieval is the canary, not p95. A regression shows up at p99 ~3 weeks before p95."</td><td>dpark from PR #475 retro</td><td>CONFIRMED (PR #475)</td><td>2026-05-16</td></tr>
 </tbody></table>
 <h2 id="manual-entries">Manual entries</h2></section>
 <section id="topic-conflict_log" class="kb-section"><h1 id="conflict-log">Conflict log</h1>

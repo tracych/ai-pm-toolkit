@@ -14,7 +14,9 @@ Each tier is more selective than the last. Querying always starts at the tightes
 
 ## Typed memory schema
 
-Borrowed from the standard Claude Code memory pattern. When `/brain-query` or external agents recall facts about the brain itself (not the team's domain), they should tag memories by type:
+> **Note:** this section describes a memory schema you can adopt in your LLM agent's own memory file (e.g. Claude Code's `MEMORY.md`). The plugin does not ship a memory file or enforce this schema — it's a recommended pattern when your agent maintains memory across sessions.
+
+When `/brain-query` or external agents recall facts about the brain itself (not the team's domain), tag memories by type:
 
 | Type | What it stores | Example |
 |---|---|---|

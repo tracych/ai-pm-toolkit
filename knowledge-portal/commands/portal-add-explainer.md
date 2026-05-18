@@ -47,7 +47,16 @@ Show the draft to the user, accept edits, then convert to HTML.
 
 ## Phase 2 — Render to HTML
 
-Use `templates/explainer.html.tmpl` as the wrapper. The template is self-contained — inline CSS, no JS, no CDN. Renders the same on any browser, prints cleanly to PDF.
+Open `templates/explainer.html.tmpl`. It contains five placeholders: `{{SUBJECT}}`, `{{AUDIENCE}}`, `{{TOPIC}}`, `{{LAST_UPDATED}}`, `{{BODY}}`.
+
+There is **no build script** for explainers — perform the substitution by hand (or in this command's response):
+- `{{SUBJECT}}` — the subject name
+- `{{AUDIENCE}}` — one of `pm-peer` / `xfn` / `leadership` / `new-hire` (uppercase for display)
+- `{{TOPIC}}` — the topic slug the explainer belongs under (e.g. `systems_and_models`)
+- `{{LAST_UPDATED}}` — today's date (YYYY-MM-DD)
+- `{{BODY}}` — the markdown draft from Phase 1, converted to HTML. For simple drafts, hand-convert headers/lists/paragraphs. For complex drafts, paste the markdown through `portal/build_portal.py`'s `md_to_html()` function (it's importable: `from build_portal import md_to_html`).
+
+The template is self-contained — inline CSS, no JS, no CDN. Renders the same on any browser, prints cleanly to PDF.
 
 Write to `portal/explainers/<slug>.html`. Slug is kebab-case version of the subject name.
 

@@ -33,6 +33,8 @@ example_kb/
     └── auto_discovery_findings.md
 ```
 
+> **Sync note:** `portal/build_portal.py`, `portal/index.html.tmpl`, and `portal/explainer.html.tmpl` here are **copies** of the files in the plugin's top-level `portal/` directory, kept here so the example is runnable standalone. If you change the upstream, re-copy them. There's no automated sync.
+
 ## Try it
 
 ```bash
