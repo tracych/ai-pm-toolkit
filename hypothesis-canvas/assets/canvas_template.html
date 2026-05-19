@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hypothesis Canvas</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --ink: #111418;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --accent: #1f6feb;
+    --accent-ink: #ffffff;
+    --warn: #b91c1c;
+    --warn-bg: #fee2e2;
+    --warn-line: #fca5a5;
+    --ok: #047857;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 32px 24px 96px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .banner { display: none; background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-line); border-radius: 8px; padding: 12px 14px; font-weight: 600; margin-bottom: 20px; }
+  .banner.show { display: block; }
+  .summary { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; font-size: 16px; line-height: 1.55; }
+  .summary strong { color: var(--ink); }
+  .summary em { color: var(--muted); font-style: normal; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+  .field { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 6px; }
+  .field .hint { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .field input, .field textarea {
+    font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 10px; resize: vertical; width: 100%;
+  }
+  .field input:focus, .field textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  .field.danger { border-color: var(--warn-line); background: #fff8f8; }
+  .field.danger label { color: var(--warn); }
+  .actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; padding: 10px 16px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink);
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button:hover { transform: translateY(-1px); }
+  .status { font-size: 13px; color: var(--ok); margin-left: 8px; align-self: center; opacity: 0; transition: opacity 0.2s; }
+  .status.show { opacity: 1; }
+  footer { margin-top: 32px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Hypothesis Canvas</h1>
+    <span class="sub">Falsifiable or it doesn't exist.</span>
+  </header>
+
+  <!-- Red banner: shown when abandon-if is empty -->
+  <div id="abandon-banner" class="banner">abandon-if required — name a concrete kill criterion before this canvas counts.</div>
+
+  <div id="summary" class="summary"></div>
+
+  <div class="grid">
+    <div class="field full">
+      <label for="change">Change</label>
+      <div class="hint">One concrete shipped thing.</div>
+      <textarea id="change" name="change" rows="2" placeholder="e.g. Add a 3-day streak counter on the home feed"></textarea>
+    </div>
+
+    <div class="field">
+      <label for="metric">Metric</label>
+      <div class="hint">One named, instrumented metric.</div>
+      <input id="metric" name="metric" type="text" placeholder="e.g. D7 retention (logged-in users)">
+    </div>
+
+    <div class="field">
+      <label for="magnitude">Magnitude</label>
+      <div class="hint">Number + direction + window.</div>
+      <input id="magnitude" name="magnitude" type="text" placeholder="e.g. +2.5pp absolute, within 4 weeks">
+    </div>
+
+    <div class="field">
+      <label for="segment">Segment</label>
+      <div class="hint">Defined cohort. "All users" is a smell.</div>
+      <input id="segment" name="segment" type="text" placeholder="e.g. First-time creators in their first week">
+    </div>
+
+    <div class="field">
+      <label for="mechanism">Mechanism</label>
+      <div class="hint">One-sentence causal story.</div>
+      <textarea id="mechanism" name="mechanism" rows="2" placeholder="e.g. Streaks create a daily anchor that pulls users back before habit decays."></textarea>
+    </div>
+
+    <div class="field full danger">
+      <label for="abandon-if">Abandon-if (mandatory)</label>
+      <div class="hint">Concrete observation that would make you kill it. Numeric threshold, deadline, or named failure.</div>
+      <textarea id="abandon-if" name="abandon-if" rows="2" placeholder="e.g. If D7 movement is <+0.5pp after 4 weeks with N>=50k per arm, we roll back and stop investing."></textarea>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="save-btn" type="button">Save to browser</button>
+    <button id="export-btn" type="button">Export JSON</button>
+    <button id="clear-btn" type="button">Clear</button>
+    <span id="status" class="status">saved</span>
+  </div>
+
+  <footer>
+    One file. Vanilla JS. Opens offline. The <code>abandon-if</code> field is the whole point.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var FIELDS = ["change", "metric", "magnitude", "segment", "mechanism", "abandon-if"];
+  var STORAGE_KEY = "hypothesis-canvas:v1";
+
+  function $(id) { return document.getElementById(id); }
+
+  function readFields() {
+    var data = {};
+    FIELDS.forEach(function (k) {
+      var el = $(k);
+      data[k] = el ? (el.value || "").trim() : "";
+    });
+    return data;
+  }
+
+  function writeFields(data) {
+    FIELDS.forEach(function (k) {
+      var el = $(k);
+      if (el && typeof data[k] === "string") el.value = data[k];
+    });
+  }
+
+  function updateBanner(data) {
+    var banner = $("abandon-banner");
+    if (!banner) return;
+    if (!data["abandon-if"]) banner.classList.add("show");
+    else banner.classList.remove("show");
+  }
+
+  function renderSummary(data) {
+    var s = $("summary");
+    if (!s) return;
+    function span(v, label) {
+      if (v) return "<strong>" + escapeHtml(v) + "</strong>";
+      return "<em>&lt;" + label + "&gt;</em>";
+    }
+    s.innerHTML =
+      "If we change " + span(data.change, "change") +
+      " for " + span(data.segment, "segment") +
+      ", we expect " + span(data.metric, "metric") +
+      " to move by " + span(data.magnitude, "magnitude") +
+      ", because " + span(data.mechanism, "mechanism") +
+      ". We will abandon if " + span(data["abandon-if"], "abandon-if") + ".";
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function refresh() {
+    var data = readFields();
+    updateBanner(data);
+    renderSummary(data);
+  }
+
+  function structuredString(data) {
+    return "If we change " + (data.change || "<change>") +
+      " for " + (data.segment || "<segment>") +
+      ", we expect " + (data.metric || "<metric>") +
+      " to move by " + (data.magnitude || "<magnitude>") +
+      ", because " + (data.mechanism || "<mechanism>") +
+      ". We will abandon if " + (data["abandon-if"] || "<abandon-if>") + ".";
+  }
+
+  function toExport(data) {
+    return {
+      change: data.change,
+      metric: data.metric,
+      magnitude: data.magnitude,
+      segment: data.segment,
+      mechanism: data.mechanism,
+      abandon_if: data["abandon-if"],
+      structured: structuredString(data)
+    };
+  }
+
+  function flashStatus(text) {
+    var s = $("status");
+    if (!s) return;
+    s.textContent = text;
+    s.classList.add("show");
+    setTimeout(function () { s.classList.remove("show"); }, 1400);
+  }
+
+  // Hydrate from localStorage on load
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) writeFields(JSON.parse(saved));
+  } catch (e) { /* ignore */ }
+
+  // Wire field events
+  FIELDS.forEach(function (k) {
+    var el = $(k);
+    if (el) el.addEventListener("input", refresh);
+  });
+
+  $("save-btn").addEventListener("click", function () {
+    var data = readFields();
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      flashStatus("saved");
+    } catch (e) {
+      flashStatus("save failed");
+    }
+  });
+
+  $("export-btn").addEventListener("click", function () {
+    var data = readFields();
+    var payload = JSON.stringify(toExport(data), null, 2);
+    var href = "data:application/json;charset=utf-8," + encodeURIComponent(payload);
+    var a = document.createElement("a");
+    a.href = href;
+    a.download = "hypothesis.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    flashStatus("exported");
+  });
+
+  $("clear-btn").addEventListener("click", function () {
+    if (!confirm("Clear all fields?")) return;
+    FIELDS.forEach(function (k) { var el = $(k); if (el) el.value = ""; });
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    refresh();
+    flashStatus("cleared");
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
