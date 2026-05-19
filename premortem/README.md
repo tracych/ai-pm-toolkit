@@ -49,7 +49,7 @@ The skill refuses to run on briefs shorter than 12 words and asks for more conte
 
 - **pm-deep-dive** — run premortem as an adversarial pass *before* finalizing the strategy doc. Findings here often invalidate prior HIGH-confidence claims.
 - **protopilot** — run premortem *after* you have a prototype, to pressure-test the actual designed behavior, not the imagined one.
-- **rollback-planner** (upcoming) — the early-warning metrics and thresholds produced here feed directly into rollback trigger conditions.
+- **rollback-planner** — the early-warning metrics and thresholds produced here feed directly into rollback trigger conditions.
 
 ## License
 
