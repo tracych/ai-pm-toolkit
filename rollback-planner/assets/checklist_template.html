@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rollback checklist</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --ink: #1c1917;
+    --muted: #78716c;
+    --line: #e7e5e4;
+    --accent: #b45309;
+    --accent-soft: #fef3c7;
+    --done: #15803d;
+    --done-soft: #dcfce7;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding: 32px 20px 96px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .pill {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .actions { display: flex; gap: 8px; }
+  button {
+    font: inherit;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  button:hover { background: #f5f5f4; border-color: #d6d3d1; }
+  button.primary { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  button.primary:hover { background: #292524; }
+  .meta {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .meta-row { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 13px; }
+  .progress {
+    height: 6px;
+    background: var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress > div {
+    height: 100%;
+    background: var(--done);
+    width: 0%;
+    transition: width 200ms ease;
+  }
+  ul.checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  ul.checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    transition: background 120ms ease;
+  }
+  ul.checklist li:last-child { border-bottom: 0; }
+  ul.checklist li:hover { background: #fafaf9; }
+  ul.checklist li.done { background: var(--done-soft); }
+  ul.checklist li.done label { color: var(--muted); text-decoration: line-through; }
+  ul.checklist input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #a8a29e;
+    border-radius: 4px;
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    background: var(--surface);
+    transition: background 120ms ease, border-color 120ms ease;
+    position: relative;
+  }
+  ul.checklist input[type="checkbox"]:hover { border-color: var(--ink); }
+  ul.checklist input[type="checkbox"]:checked {
+    background: var(--done);
+    border-color: var(--done);
+  }
+  ul.checklist input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  ul.checklist label {
+    flex: 1;
+    cursor: pointer;
+    line-height: 1.5;
+  }
+  footer {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  @media print {
+    body { background: #fff; padding: 24px; }
+    .actions, .pill { display: none; }
+    .meta, ul.checklist { box-shadow: none; border-color: #ccc; }
+    ul.checklist li:hover { background: transparent; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Rollback checklist</h1>
+      <div class="sub">Fill before launch. Rehearse once. Re-verify post-launch.</div>
+    </div>
+    <span class="pill">ROLLBACK CHECKLIST — fill before launch, rehearse once</span>
+  </header>
+
+  <div class="meta">
+    <div class="meta-row">
+      <span id="counter">0 / 0 complete</span>
+      <span>State saved locally via <code>localStorage</code></span>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="meta-row" style="margin-top: 14px;">
+      <div class="actions">
+        <button id="reset">Reset</button>
+        <button id="print" class="primary">Print</button>
+      </div>
+    </div>
+  </div>
+
+  <ul class="checklist" id="list">
+    <li><input type="checkbox" id="step-1" /><label for="step-1">Confirm kill-switch is wired and tested in staging</label></li>
+    <li><input type="checkbox" id="step-2" /><label for="step-2">Confirm DRI and backup are on-call window-aligned for launch</label></li>
+    <li><input type="checkbox" id="step-3" /><label for="step-3">Confirm monitors are firing on all three trigger thresholds</label></li>
+    <li><input type="checkbox" id="step-4" /><label for="step-4">Run dry-run rollback in non-prod environment</label></li>
+    <li><input type="checkbox" id="step-5" /><label for="step-5">Pre-stage internal comms draft</label></li>
+    <li><input type="checkbox" id="step-6" /><label for="step-6">Pre-stage customer comms draft</label></li>
+    <li><input type="checkbox" id="step-7" /><label for="step-7">Confirm exec sponsor is reachable during launch window</label></li>
+    <li><input type="checkbox" id="step-8" /><label for="step-8">Confirm dependencies have been notified</label></li>
+    <li><input type="checkbox" id="step-9" /><label for="step-9">Confirm rollback playbook is linked in the on-call channel</label></li>
+    <li><input type="checkbox" id="step-10" /><label for="step-10">Post-launch: leave checklist open for 24h, re-verify each item</label></li>
+  </ul>
+
+  <footer>Single file. Offline. No network calls. State persists in this browser only.</footer>
+</div>
+
+<script>
+  (function () {
+    var STORAGE_KEY = "rollback-checklist-state";
+    var list = document.getElementById("list");
+    var boxes = list.querySelectorAll('input[type="checkbox"]');
+    var counter = document.getElementById("counter");
+    var bar = document.getElementById("bar");
+
+    function load() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return {};
+        return JSON.parse(raw) || {};
+      } catch (e) { return {}; }
+    }
+    function save(state) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+    function refresh() {
+      var done = 0;
+      boxes.forEach(function (b) {
+        var li = b.parentElement;
+        if (b.checked) { li.classList.add("done"); done++; }
+        else { li.classList.remove("done"); }
+      });
+      counter.textContent = done + " / " + boxes.length + " complete";
+      bar.style.width = (boxes.length ? (done / boxes.length * 100) : 0) + "%";
+    }
+
+    var state = load();
+    boxes.forEach(function (b) {
+      if (state[b.id]) b.checked = true;
+      b.addEventListener("change", function () {
+        var s = load();
+        s[b.id] = b.checked;
+        save(s);
+        refresh();
+      });
+    });
+    refresh();
+
+    document.getElementById("reset").addEventListener("click", function () {
+      if (!confirm("Clear all checked items? This cannot be undone.")) return;
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      boxes.forEach(function (b) { b.checked = false; });
+      refresh();
+    });
+    document.getElementById("print").addEventListener("click", function () {
+      window.print();
+    });
+  })();
+</script>
+</body>
+</html>
