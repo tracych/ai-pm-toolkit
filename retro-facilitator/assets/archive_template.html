@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Retro archive</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #e3e1db;
+    --accent: #2d4a3e;
+    --pill-bg: #eef2ec;
+    --row-hover: #f3f1eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.45;
+  }
+  header {
+    padding: 32px 40px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  h1 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  .pill {
+    display: inline-block;
+    background: var(--pill-bg);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+  .subhead {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  main {
+    padding: 24px 40px 60px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 14px;
+  }
+  thead th {
+    text-align: left;
+    background: #f6f5f0;
+    color: var(--fg);
+    font-weight: 600;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: default;
+    user-select: none;
+    font-size: 13px;
+  }
+  thead th.sortable {
+    cursor: pointer;
+  }
+  thead th.sortable:hover {
+    background: #ece9e0;
+  }
+  thead th .arrow {
+    color: var(--muted);
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  tbody tr:hover {
+    background: var(--row-hover);
+  }
+  tbody tr.empty td {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    padding: 32px 14px;
+  }
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+  }
+  a:hover {
+    border-bottom-style: solid;
+  }
+  .marker {
+    display: inline-block;
+    background: var(--pill-bg);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .count {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+  footer {
+    padding: 20px 40px 40px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Retro archive</h1>
+  <span class="pill">Local retro archive — append-only, no external sync</span>
+  <div class="subhead">Click the Date column to sort. One row per retro. File lives on your disk only.</div>
+</header>
+<main>
+  <table id="retros">
+    <thead>
+      <tr>
+        <th class="sortable" data-col="0" data-type="date">Date <span class="arrow">&#x25BC;</span></th>
+        <th>Launch</th>
+        <th>Marker</th>
+        <th>Top lesson</th>
+        <th>Action items</th>
+        <th>Writeup</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="empty"><td colspan="6">No retros yet. Run <code>/retro-facilitator &lt;launch-slug&gt;</code> to add the first row.</td></tr>
+    </tbody>
+  </table>
+</main>
+<footer>
+  retros/index.html &mdash; generated and appended to by the retro-facilitator skill. Safe to open offline; safe to commit to a private repo.
+</footer>
+<script>
+(function () {
+  var table = document.getElementById('retros');
+  if (!table) return;
+  var headers = table.querySelectorAll('th.sortable');
+  headers.forEach(function (th) {
+    th.addEventListener('click', function () {
+      var col = parseInt(th.getAttribute('data-col'), 10);
+      var type = th.getAttribute('data-type') || 'string';
+      var tbody = table.querySelector('tbody');
+      var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+      // Drop the empty-state row from sorting
+      rows = rows.filter(function (r) { return !r.classList.contains('empty'); });
+      if (rows.length === 0) return;
+      var asc = th.getAttribute('data-asc') !== 'true';
+      rows.sort(function (a, b) {
+        var av = (a.children[col] && a.children[col].textContent || '').trim();
+        var bv = (b.children[col] && b.children[col].textContent || '').trim();
+        if (type === 'date') {
+          return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+        }
+        return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+      th.setAttribute('data-asc', asc ? 'true' : 'false');
+      var arrow = th.querySelector('.arrow');
+      if (arrow) arrow.innerHTML = asc ? '&#x25B2;' : '&#x25BC;';
+      rows.forEach(function (r) { tbody.appendChild(r); });
+    });
+  });
+})();
+</script>
+</body>
+</html>
