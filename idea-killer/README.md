@@ -55,7 +55,7 @@ A single `idea-killer/reports/<slug>/kill-report.md` containing:
 ## Composes with
 
 - **pm-deep-dive** — after a deep-dive lands a claim verdict, run idea-killer on the resulting recommendation as a final adversarial pass before shipping the doc.
-- **hypothesis-canvas** (tentative) — the 7 failure modes become the explicit *abandon-if* conditions on the hypothesis canvas.
+- **hypothesis-canvas** — the 7 failure modes become the explicit *abandon-if* conditions on the hypothesis canvas.
 - **protopilot** — kill the idea first; if it survives, prototype it.
 
 ## License
