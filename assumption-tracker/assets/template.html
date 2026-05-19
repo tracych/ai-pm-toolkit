@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assumption Tracker</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #e3e3df;
+    --card: #ffffff;
+    --accent: #c8362c;
+    --warn: #d4a017;
+    --ok: #4a7c59;
+    --kill: #fff4f3;
+    --quad-hi: #fff8e8;
+    --quad-lo: #f4f4f1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.45;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 32px; }
+  h1 { margin: 0 0 6px; font-size: 28px; letter-spacing: -0.01em; }
+  h2 { font-size: 18px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin: 40px 0 16px; }
+  .sub { color: var(--muted); font-size: 14px; }
+  .pill {
+    display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 999px;
+    background: var(--accent); color: white; vertical-align: middle; margin-right: 8px;
+  }
+
+  /* Kill list */
+  .kill-list {
+    background: var(--kill);
+    border: 1px solid #f0c4c0;
+    border-radius: 8px;
+    padding: 20px 24px;
+  }
+  .kill-list ol { margin: 0; padding-left: 24px; }
+  .kill-list li { margin-bottom: 14px; }
+  .kill-list li:last-child { margin-bottom: 0; }
+  .kill-text { font-weight: 600; }
+  .kill-exp { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* 2x2 matrix */
+  .matrix-wrap { display: grid; grid-template-columns: 40px 1fr; gap: 8px; margin-top: 8px; }
+  .y-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    align-self: center;
+  }
+  .matrix {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    aspect-ratio: 2 / 1.2;
+  }
+  .cell {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: background 120ms ease;
+    display: flex; flex-direction: column;
+  }
+  .cell:hover { background: #f8f8f4; }
+  .cell.open { background: #fff; box-shadow: 0 4px 18px rgba(0,0,0,0.06); }
+  .cell.q-hi-hi { border-color: #f0c4c0; background: var(--quad-hi); }
+  .cell .label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .cell .count { font-size: 32px; font-weight: 700; margin: 6px 0 8px; }
+  .cell .desc { font-size: 13px; color: var(--muted); }
+  .cell ul.items { list-style: none; padding: 0; margin: 12px 0 0; display: none; }
+  .cell.open ul.items { display: block; }
+  .item {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .item .src { color: var(--muted); font-style: italic; display: block; margin-top: 4px; font-size: 12px; }
+  .item .exp {
+    display: block; margin-top: 6px; padding: 6px 8px;
+    background: #f4f7f4; border-left: 2px solid var(--ok); font-size: 12px;
+  }
+  .item .exp.none { background: #fdf6e3; border-left-color: var(--warn); color: #7a5800; }
+  .x-axis {
+    grid-column: 2; display: flex; justify-content: space-between;
+    margin-top: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .x-axis-title {
+    grid-column: 2; text-align: center; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); margin-top: 4px;
+  }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  code { background: #efefe9; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1 id="title">Assumption Tracker</h1>
+  <div class="sub" id="subtitle">Load-bearing × testable map of the assumptions hiding in this doc.</div>
+</header>
+
+<section>
+  <h2><span class="pill">Kill list</span>Top 5 to validate first</h2>
+  <div class="kill-list">
+    <ol id="kill-list"></ol>
+  </div>
+</section>
+
+<section>
+  <h2>The 2×2</h2>
+  <div class="matrix-wrap">
+    <div class="y-label">Load-bearing &nbsp;&rarr;&nbsp; High</div>
+    <div>
+      <div class="matrix" id="matrix"></div>
+      <div class="x-axis">
+        <span>Low</span><span>High</span>
+      </div>
+      <div class="x-axis-title">Testable in &lt; 2 weeks</div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top: 14px;">Click any quadrant to expand its assumptions and the proposed validation experiment for each.</p>
+</section>
+
+<footer>
+  Generated by <code>assumption-tracker</code> &middot; open-source PM toolkit &middot; offline, single file.
+</footer>
+</div>
+
+<script id="data" type="application/json">
+{
+  "title": "Sample PRD",
+  "slug": "sample",
+  "killList": [
+    {"rank": 1, "text": "Target users will pay $X/month for this", "experiment": "30-response unbranded pricing survey to target segment (~2 days)"},
+    {"rank": 2, "text": "Users will discover the feature without onboarding", "experiment": "5-person prompted task on a paper prototype (~1 PM-day)"}
+  ],
+  "assumptions": [
+    {"text": "Target users will pay $X/month for this", "loadBearing": true, "testable": true, "experiment": "30-response unbranded pricing survey to target segment (~2 days)", "source": "Sample doc line."},
+    {"text": "Regulatory environment stays favorable through 2027", "loadBearing": true, "testable": false, "experiment": null, "source": "Sample doc line."},
+    {"text": "Engineering can ship v1 in one quarter", "loadBearing": true, "testable": true, "experiment": "1-day technical spike on the unknown component (~1 eng-day)", "source": "Sample doc line."},
+    {"text": "Brand color choice resonates", "loadBearing": false, "testable": true, "experiment": "A/B on landing page (~3 days)", "source": "Sample doc line."}
+  ]
+}
+</script>
+
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById('data').textContent);
+
+  document.getElementById('title').textContent = (data.title || 'Assumptions') + ' — Assumption Tracker';
+
+  // Kill list
+  const killEl = document.getElementById('kill-list');
+  (data.killList || []).forEach(function (k) {
+    const li = document.createElement('li');
+    const t = document.createElement('span');
+    t.className = 'kill-text';
+    t.textContent = k.text;
+    li.appendChild(t);
+    if (k.experiment) {
+      const e = document.createElement('span');
+      e.className = 'kill-exp';
+      e.textContent = 'Cheapest test: ' + k.experiment;
+      li.appendChild(e);
+    } else {
+      const e = document.createElement('span');
+      e.className = 'kill-exp';
+      e.textContent = 'Not testable in <2wk — premortem candidate.';
+      li.appendChild(e);
+    }
+    killEl.appendChild(li);
+  });
+  if (!(data.killList || []).length) {
+    killEl.innerHTML = '<li class="sub">No kill-list items — see 2×2 below.</li>';
+  }
+
+  // Bucket by quadrant
+  const buckets = {
+    'hi-hi': [], // load-bearing + testable
+    'hi-lo': [], // load-bearing + not testable
+    'lo-hi': [], // not load-bearing + testable
+    'lo-lo': []  // not load-bearing + not testable
+  };
+  (data.assumptions || []).forEach(function (a) {
+    const key = (a.loadBearing ? 'hi' : 'lo') + '-' + (a.testable ? 'hi' : 'lo');
+    buckets[key].push(a);
+  });
+
+  const cells = [
+    { key: 'hi-lo', label: 'Load-bearing · Not testable', desc: 'Premortem candidates. Watchlist, escalate, build contingency.', cls: '' },
+    { key: 'hi-hi', label: 'Load-bearing · Testable', desc: 'Kill-list quadrant. Run experiments now.', cls: 'q-hi-hi' },
+    { key: 'lo-lo', label: 'Not load-bearing · Not testable', desc: 'Ignore. Stop debating these.', cls: '' },
+    { key: 'lo-hi', label: 'Not load-bearing · Testable', desc: 'Backlog. Nice to validate, low urgency.', cls: '' }
+  ];
+
+  const matrix = document.getElementById('matrix');
+  cells.forEach(function (c) {
+    const div = document.createElement('div');
+    div.className = 'cell ' + c.cls;
+    const items = buckets[c.key];
+    div.innerHTML =
+      '<div class="label">' + c.label + '</div>' +
+      '<div class="count">' + items.length + '</div>' +
+      '<div class="desc">' + c.desc + '</div>' +
+      '<ul class="items"></ul>';
+    const ul = div.querySelector('ul.items');
+    items.forEach(function (a) {
+      const li = document.createElement('li');
+      li.className = 'item';
+      const text = document.createElement('div');
+      text.textContent = a.text;
+      li.appendChild(text);
+      if (a.source) {
+        const s = document.createElement('span');
+        s.className = 'src';
+        s.textContent = 'Source: "' + a.source + '"';
+        li.appendChild(s);
+      }
+      const e = document.createElement('span');
+      if (a.experiment) {
+        e.className = 'exp';
+        e.textContent = 'Cheapest test: ' + a.experiment;
+      } else {
+        e.className = 'exp none';
+        e.textContent = 'Not testable in <2wk — premortem candidate.';
+      }
+      li.appendChild(e);
+      ul.appendChild(li);
+    });
+    if (!items.length) {
+      const empty = document.createElement('li');
+      empty.className = 'sub';
+      empty.style.fontSize = '12px';
+      empty.textContent = '(empty)';
+      ul.appendChild(empty);
+    }
+    div.addEventListener('click', function () { div.classList.toggle('open'); });
+    matrix.appendChild(div);
+  });
+})();
+</script>
+</body>
+</html>
