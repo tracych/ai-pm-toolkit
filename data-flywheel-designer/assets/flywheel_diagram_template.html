@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Data Flywheel</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #181b22;
+    --panel-2: #1f232c;
+    --ink: #e8ebf1;
+    --muted: #8a93a6;
+    --accent: #6ee7b7;
+    --accent-2: #60a5fa;
+    --border: #2a2f3a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  header {
+    padding: 24px 32px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .toolbar {
+    padding: 12px 32px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .toolbar button {
+    background: var(--panel-2);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .toolbar button:hover { border-color: var(--accent-2); }
+  .toolbar .status {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 12px;
+    align-self: center;
+  }
+  main {
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .stage {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    position: relative;
+  }
+  .stage .num {
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: var(--accent);
+    color: #0f1115;
+    font-weight: 700;
+    font-size: 12px;
+    border-radius: 999px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stage h2 {
+    margin: 4px 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-2);
+    letter-spacing: 0.3px;
+  }
+  .stage .plan {
+    flex: 1;
+    background: var(--panel-2);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    color: var(--ink);
+    font-size: 13px;
+    min-height: 80px;
+    outline: none;
+    white-space: pre-wrap;
+  }
+  .stage .plan:focus { border-color: var(--accent); border-style: solid; }
+  .stage .hint {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 11px;
+    font-style: italic;
+  }
+  .flow {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 8px 0 0;
+  }
+  .arrows {
+    margin: 0 auto;
+    display: block;
+    max-width: 900px;
+  }
+  footer {
+    padding: 16px 32px 32px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    main { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Data Flywheel</h1>
+  <p>Six stages. Every one mandatory. Click any box to edit — changes persist locally in your browser.</p>
+</header>
+
+<div class="toolbar">
+  <button onclick="saveAll()">Save</button>
+  <button onclick="resetAll()">Reset to template</button>
+  <button onclick="exportMd()">Copy as markdown</button>
+  <span class="status" id="status">Edits auto-save to localStorage</span>
+</div>
+
+<main>
+
+  <section class="stage" data-stage="1">
+    <div class="num">1</div>
+    <h2>Cold-start data plan</h2>
+    <div class="plan" contenteditable="true" data-key="stage1"><!-- PLAN:1 --></div>
+    <div class="hint">Skip this and the flywheel never spins — no v0 = no signal.</div>
+  </section>
+
+  <section class="stage" data-stage="2">
+    <div class="num">2</div>
+    <h2>Signal capture</h2>
+    <div class="plan" contenteditable="true" data-key="stage2"><!-- PLAN:2 --></div>
+    <div class="hint">Always include at least one implicit signal — explicit feedback is &lt;1%.</div>
+  </section>
+
+  <section class="stage" data-stage="3">
+    <div class="num">3</div>
+    <h2>Labeling pipeline</h2>
+    <div class="plan" contenteditable="true" data-key="stage3"><!-- PLAN:3 --></div>
+    <div class="hint">No $/label number = hope, not plan.</div>
+  </section>
+
+  <section class="stage" data-stage="4">
+    <div class="num">4</div>
+    <h2>Storage &amp; schema</h2>
+    <div class="plan" contenteditable="true" data-key="stage4"><!-- PLAN:4 --></div>
+    <div class="hint">Missing fields can't be backfilled six months later.</div>
+  </section>
+
+  <section class="stage" data-stage="5">
+    <div class="num">5</div>
+    <h2>Retraining trigger</h2>
+    <div class="plan" contenteditable="true" data-key="stage5"><!-- PLAN:5 --></div>
+    <div class="hint">Quantified — "N samples OR K-pp eval drop", not "when ready".</div>
+  </section>
+
+  <section class="stage" data-stage="6">
+    <div class="num">6</div>
+    <h2>Closing the loop</h2>
+    <div class="plan" contenteditable="true" data-key="stage6"><!-- PLAN:6 --></div>
+    <div class="hint">Shadow / A/B / ramp — never auto-deploy a fresh model.</div>
+  </section>
+
+  <div class="flow">
+    <svg class="arrows" viewBox="0 0 900 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#60a5fa"/>
+        </marker>
+      </defs>
+      <path d="M40,30 C 180,0 320,60 460,30 S 740,0 860,30"
+            fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4 4"
+            marker-end="url(#arr)"/>
+      <text x="450" y="55" text-anchor="middle" fill="#8a93a6" font-size="11"
+            font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif">
+        1 → 2 → 3 → 4 → 5 → 6 → back to 1 (each retrain reshapes cold-start for the next iteration)
+      </text>
+    </svg>
+  </div>
+
+</main>
+
+<footer>
+  Generated by data-flywheel-designer. Single-file HTML — no network calls, no CDN. Your edits live in this browser's localStorage under key <code>data-flywheel-designer</code>.
+</footer>
+
+<script>
+  const STORAGE_KEY = 'data-flywheel-designer';
+  const status = document.getElementById('status');
+
+  function loadAll() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      document.querySelectorAll('.plan').forEach(el => {
+        const k = el.getAttribute('data-key');
+        if (data[k] != null) el.innerText = data[k];
+      });
+      status.textContent = 'Loaded saved edits';
+    } catch (e) {
+      status.textContent = 'Could not load saved edits';
+    }
+  }
+
+  function saveAll() {
+    const data = {};
+    document.querySelectorAll('.plan').forEach(el => {
+      data[el.getAttribute('data-key')] = el.innerText;
+    });
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      status.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+    } catch (e) {
+      status.textContent = 'Save failed: ' + e.message;
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all six stages to the original template text? This clears your saved edits.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+
+  function exportMd() {
+    const titles = [
+      '1. Cold-start data plan',
+      '2. Signal capture',
+      '3. Labeling pipeline',
+      '4. Storage & schema',
+      '5. Retraining trigger',
+      '6. Closing the loop'
+    ];
+    let out = '# Data Flywheel\n\n';
+    document.querySelectorAll('.plan').forEach((el, i) => {
+      out += '## ' + titles[i] + '\n\n' + el.innerText.trim() + '\n\n';
+    });
+    navigator.clipboard.writeText(out).then(
+      () => status.textContent = 'Markdown copied to clipboard',
+      () => status.textContent = 'Clipboard write failed — select the page and copy manually'
+    );
+  }
+
+  // Auto-save on edit (debounced).
+  let t;
+  document.querySelectorAll('.plan').forEach(el => {
+    el.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(saveAll, 600);
+    });
+  });
+
+  loadAll();
+</script>
+</body>
+</html>
