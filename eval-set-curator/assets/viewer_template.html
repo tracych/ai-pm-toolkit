@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Eval set viewer</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1f232c;
+    --border: #2a2f3a;
+    --text: #e6e8ec;
+    --muted: #8a93a6;
+    --accent: #6aa6ff;
+    --pass: #4ade80;
+    --fail: #f87171;
+    --skip: #fbbf24;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 600;
+  }
+  .counter {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .counter strong { color: var(--text); }
+  .counter .p { color: var(--pass); }
+  .counter .f { color: var(--fail); }
+  .counter .s { color: var(--skip); }
+  .actions button {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .actions button:hover { border-color: var(--accent); }
+  main {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 65px);
+  }
+  aside {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+  }
+  aside h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+  .cat-list { list-style: none; padding: 0; margin: 0; }
+  .cat-list li {
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+    font-size: 13px;
+  }
+  .cat-list li:hover { background: var(--panel-2); }
+  .cat-list li.active { background: var(--panel-2); border-left: 3px solid var(--accent); padding-left: 7px; }
+  .cat-list li .count {
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  section.rows {
+    padding: 16px 24px;
+    overflow-y: auto;
+  }
+  .row-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .row-card.pass { border-left: 4px solid var(--pass); }
+  .row-card.fail { border-left: 4px solid var(--fail); }
+  .row-card.skip { border-left: 4px solid var(--skip); }
+  .row-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .row-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .row-cat {
+    background: var(--panel-2);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .row-mark { display: flex; gap: 6px; }
+  .row-mark button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .row-mark button.on-pass { background: var(--pass); color: #052e16; border-color: var(--pass); }
+  .row-mark button.on-fail { background: var(--fail); color: #450a0a; border-color: var(--fail); }
+  .row-mark button.on-skip { background: var(--skip); color: #422006; border-color: var(--skip); }
+  .field {
+    margin-top: 8px;
+  }
+  .field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .field-value {
+    background: var(--panel-2);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+  }
+  .field-value.prose {
+    font-family: inherit;
+    font-size: 13.5px;
+  }
+  .pc-type {
+    display: inline-block;
+    background: var(--panel-2);
+    color: var(--accent);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-right: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .empty-state {
+    color: var(--muted);
+    padding: 32px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Eval set viewer</h1>
+  <div class="counter">
+    <span><strong id="c-marked">0</strong> / <span id="c-total">0</span> marked</span>
+    &nbsp;·&nbsp;
+    <span class="p"><strong id="c-pass">0</strong> PASS</span>
+    &nbsp;
+    <span class="f"><strong id="c-fail">0</strong> FAIL</span>
+    &nbsp;
+    <span class="s"><strong id="c-skip">0</strong> SKIP</span>
+  </div>
+  <div class="actions">
+    <button id="export-btn">Export results</button>
+    <button id="reset-btn">Reset marks</button>
+  </div>
+</header>
+<main>
+  <aside>
+    <h2>Filter by category</h2>
+    <ul class="cat-list" id="cat-list"></ul>
+  </aside>
+  <section class="rows" id="rows"></section>
+</main>
+
+<script id="eval-data" type="application/x-jsonl">__EVAL_SET_JSONL__</script>
+<script>
+(function () {
+  // Parse JSONL from the inlined script tag.
+  var raw = document.getElementById("eval-data").textContent.trim();
+  var rows = [];
+  if (raw && raw !== "__EVAL_SET_JSONL__") {
+    raw.split(/\r?\n/).forEach(function (line) {
+      line = line.trim();
+      if (!line) return;
+      try { rows.push(JSON.parse(line)); }
+      catch (e) { console.warn("Skipping malformed JSONL line:", line); }
+    });
+  }
+
+  var STORAGE_KEY = "eval-set-marks-v1";
+  var marks = {};
+  try { marks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+  catch (e) { marks = {}; }
+
+  // Build category sidebar.
+  var byCat = {};
+  rows.forEach(function (r) {
+    if (!byCat[r.category]) byCat[r.category] = [];
+    byCat[r.category].push(r);
+  });
+  var categories = Object.keys(byCat).sort();
+
+  var activeCategory = "__all__";
+
+  function renderSidebar() {
+    var list = document.getElementById("cat-list");
+    var html = "";
+    html += '<li data-cat="__all__"' + (activeCategory === "__all__" ? ' class="active"' : "") +
+            '><span>All</span><span class="count">' + rows.length + '</span></li>';
+    categories.forEach(function (cat) {
+      html += '<li data-cat="' + escapeAttr(cat) + '"' +
+              (activeCategory === cat ? ' class="active"' : "") +
+              '><span>' + escapeHtml(cat) + '</span><span class="count">' + byCat[cat].length + '</span></li>';
+    });
+    list.innerHTML = html;
+    Array.prototype.forEach.call(list.querySelectorAll("li"), function (li) {
+      li.addEventListener("click", function () {
+        activeCategory = li.getAttribute("data-cat");
+        renderSidebar();
+        renderRows();
+      });
+    });
+  }
+
+  function renderRows() {
+    var container = document.getElementById("rows");
+    var visible = activeCategory === "__all__" ? rows : (byCat[activeCategory] || []);
+    if (!visible.length) {
+      container.innerHTML = '<div class="empty-state">No rows in this category. (If this is regression-from-prior-bug, the team did not supply any known bugs — see eval-set.md notes.)</div>';
+      return;
+    }
+    var html = "";
+    visible.forEach(function (r) {
+      var mark = marks[r.id] || "";
+      var pc = r.pass_criteria || {};
+      var pcVal = typeof pc.value === "string" ? pc.value : JSON.stringify(pc.value, null, 2);
+      html += '<div class="row-card ' + mark + '" data-id="' + escapeAttr(r.id) + '">' +
+        '<div class="row-head">' +
+          '<div>' +
+            '<span class="row-cat">' + escapeHtml(r.category || "") + '</span>' +
+            '<span class="row-id">' + escapeHtml(r.id || "") + '</span>' +
+          '</div>' +
+          '<div class="row-mark">' +
+            '<button data-act="pass" class="' + (mark === "pass" ? "on-pass" : "") + '">PASS</button>' +
+            '<button data-act="fail" class="' + (mark === "fail" ? "on-fail" : "") + '">FAIL</button>' +
+            '<button data-act="skip" class="' + (mark === "skip" ? "on-skip" : "") + '">SKIP</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field"><div class="field-label">Input</div>' +
+          '<div class="field-value">' + escapeHtml(r.input || "") + '</div></div>' +
+        '<div class="field"><div class="field-label">Expected behavior</div>' +
+          '<div class="field-value prose">' + escapeHtml(r.expected_behavior || "") + '</div></div>' +
+        '<div class="field"><div class="field-label">Pass criteria</div>' +
+          '<div class="field-value"><span class="pc-type">' + escapeHtml(pc.type || "?") + '</span>' +
+          escapeHtml(pcVal || "") + '</div></div>' +
+        (r.notes ? '<div class="field"><div class="field-label">Notes</div>' +
+          '<div class="field-value prose">' + escapeHtml(r.notes) + '</div></div>' : "") +
+      '</div>';
+    });
+    container.innerHTML = html;
+
+    Array.prototype.forEach.call(container.querySelectorAll(".row-card"), function (card) {
+      var id = card.getAttribute("data-id");
+      Array.prototype.forEach.call(card.querySelectorAll(".row-mark button"), function (btn) {
+        btn.addEventListener("click", function () {
+          var act = btn.getAttribute("data-act");
+          if (marks[id] === act) delete marks[id];
+          else marks[id] = act;
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(marks)); }
+          catch (e) { /* localStorage full / disabled */ }
+          renderRows();
+          updateCounter();
+        });
+      });
+    });
+  }
+
+  function updateCounter() {
+    var total = rows.length;
+    var pass = 0, fail = 0, skip = 0;
+    Object.keys(marks).forEach(function (k) {
+      if (marks[k] === "pass") pass++;
+      else if (marks[k] === "fail") fail++;
+      else if (marks[k] === "skip") skip++;
+    });
+    document.getElementById("c-total").textContent = total;
+    document.getElementById("c-marked").textContent = pass + fail + skip;
+    document.getElementById("c-pass").textContent = pass;
+    document.getElementById("c-fail").textContent = fail;
+    document.getElementById("c-skip").textContent = skip;
+  }
+
+  document.getElementById("export-btn").addEventListener("click", function () {
+    var payload = { exported_at: new Date().toISOString(), marks: marks };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "eval-results-" + (new Date().toISOString().slice(0, 10)) + ".json";
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 100);
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", function () {
+    if (!confirm("Clear all marks for this set?")) return;
+    marks = {};
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    renderRows();
+    updateCounter();
+  });
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  renderSidebar();
+  renderRows();
+  updateCounter();
+})();
+</script>
+</body>
+</html>
