@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Cost &amp; Latency Budgeter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161a21;
+    --panel-2: #1d222b;
+    --ink: #e6e8ee;
+    --muted: #8a93a6;
+    --accent: #7cc4ff;
+    --good: #7be0a4;
+    --warn: #ffd166;
+    --bad: #ff6b6b;
+    --rule: #262c38;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 20px 24px; border-bottom: 1px solid var(--rule); }
+  header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  main { display: grid; grid-template-columns: 380px 1fr; gap: 24px; padding: 24px; max-width: 1280px; margin: 0 auto; }
+  @media (max-width: 880px) { main { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 18px; }
+  .panel h2 { margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted); }
+  .field .val { float: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+  input[type="number"], select {
+    width: 100%; padding: 8px 10px; background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 6px; font: inherit;
+  }
+  input[type="range"] { width: 100%; }
+  .tier-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .tier-row button {
+    padding: 8px 6px; background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 6px; cursor: pointer; font: inherit;
+  }
+  .tier-row button.active { background: var(--accent); color: #07203a; border-color: var(--accent); font-weight: 600; }
+  .results h2 { margin-top: 0; }
+  .banner {
+    margin: 0 0 18px; padding: 12px 14px; border-radius: 8px;
+    border: 1px solid var(--rule); background: var(--panel-2);
+    font-size: 13px;
+  }
+  .banner.bad { background: #3a1414; border-color: var(--bad); color: #ffdada; }
+  .banner.good { background: #14321f; border-color: var(--good); color: #d2f5e0; }
+  .grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  }
+  .kpi { background: var(--panel-2); border: 1px solid var(--rule); border-radius: 8px; padding: 14px; }
+  .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .kpi .value { font-size: 22px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); font-size: 13px; }
+  th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .actions button {
+    background: var(--panel-2); color: var(--ink); border: 1px solid var(--rule);
+    padding: 8px 14px; border-radius: 6px; cursor: pointer; font: inherit;
+  }
+  .actions button.primary { background: var(--accent); color: #07203a; border-color: var(--accent); font-weight: 600; }
+  .math {
+    margin-top: 16px; padding: 12px 14px; background: var(--panel-2);
+    border: 1px solid var(--rule); border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+    color: var(--muted); white-space: pre-wrap;
+  }
+  .saved { margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .saved ul { margin: 6px 0 0; padding-left: 18px; }
+  .saved li { margin: 2px 0; }
+  .saved a { color: var(--accent); cursor: pointer; text-decoration: underline; }
+  details { margin-top: 12px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cost &amp; Latency Budgeter</h1>
+  <p>Back-of-envelope per-user-month cost &amp; p95 latency for an AI feature. Tune the sliders — find the knob that makes economics work. Numbers are conservative ranges, verify model prices before quoting.</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Inputs</h2>
+
+    <div class="field">
+      <label>Feature name</label>
+      <input type="text" id="featureName" value="My AI feature" style="width:100%;padding:8px 10px;background:var(--panel-2);color:var(--ink);border:1px solid var(--rule);border-radius:6px;font:inherit;" />
+    </div>
+
+    <div class="field">
+      <label>DAU</label>
+      <input type="number" id="dau" min="1" step="1000" value="100000" />
+    </div>
+    <div class="field">
+      <label>Calls per user per day</label>
+      <input type="number" id="callsPerUser" min="0" step="0.5" value="5" />
+    </div>
+    <div class="field">
+      <label>Input tokens per call</label>
+      <input type="number" id="inputTokens" min="0" step="100" value="3000" />
+    </div>
+    <div class="field">
+      <label>Output tokens per call</label>
+      <input type="number" id="outputTokens" min="0" step="50" value="300" />
+    </div>
+
+    <div class="field">
+      <label>Model tier</label>
+      <div class="tier-row" id="tierRow">
+        <button data-tier="frontier">frontier</button>
+        <button data-tier="mid" class="active">mid</button>
+        <button data-tier="small">small</button>
+        <button data-tier="open">open</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Prompt cache hit % <span class="val" id="cacheHitVal">0%</span></label>
+      <input type="range" id="cacheHit" min="0" max="95" step="5" value="0" />
+    </div>
+
+    <div class="field">
+      <label>Batching factor (calls collapsed into 1 request) <span class="val" id="batchingVal">1x</span></label>
+      <input type="range" id="batching" min="1" max="20" step="1" value="1" />
+    </div>
+
+    <div class="field">
+      <label>Retry rate <span class="val" id="retryVal">5%</span></label>
+      <input type="range" id="retryRate" min="0" max="50" step="1" value="5" />
+    </div>
+
+    <div class="field">
+      <label>Red-banner threshold ($/user/month) <span class="val" id="thresholdVal">$1.00</span></label>
+      <input type="range" id="threshold" min="0.05" max="10" step="0.05" value="1" />
+    </div>
+
+    <details>
+      <summary>Latency stack tuning</summary>
+      <div class="field" style="margin-top:10px">
+        <label>Retrieval ms (e.g. RAG lookup) <span class="val" id="retrievalVal">50 ms</span></label>
+        <input type="range" id="retrieval" min="0" max="500" step="10" value="50" />
+      </div>
+      <div class="field">
+        <label>Network ms (round-trip) <span class="val" id="networkVal">100 ms</span></label>
+        <input type="range" id="network" min="0" max="500" step="10" value="100" />
+      </div>
+    </details>
+  </section>
+
+  <section class="results panel">
+    <div id="banner" class="banner">Per-user-month cost will appear here.</div>
+
+    <div class="grid">
+      <div class="kpi">
+        <div class="label">Per-call cost</div>
+        <div class="value" id="kpiCall">$0.0000</div>
+        <div class="sub" id="kpiCallRange">range $0.0000 – $0.0000</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Per-user-month</div>
+        <div class="value" id="kpiUserMonth">$0.00</div>
+        <div class="sub" id="kpiUserMonthRange">range $0.00 – $0.00</div>
+      </div>
+      <div class="kpi">
+        <div class="label">p95 latency</div>
+        <div class="value" id="kpiLatency">0 ms</div>
+        <div class="sub">retrieval + first-token + generation + network + retries</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Tokens / sec (plan-against)</div>
+        <div class="value" id="kpiTps">0</div>
+        <div class="sub">lower end of tier range</div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:18px">Monthly totals at scale (plan-against)</h2>
+    <table>
+      <thead><tr><th>Users</th><th>Monthly cost</th><th>Annualized</th></tr></thead>
+      <tbody id="scaleBody"></tbody>
+    </table>
+
+    <div class="math" id="math"></div>
+
+    <div class="actions">
+      <button class="primary" id="saveBtn">Save scenario</button>
+      <button id="exportBtn">Export JSON</button>
+      <button id="clearBtn">Clear saved</button>
+    </div>
+
+    <div class="saved" id="saved"></div>
+  </section>
+</main>
+
+<script>
+// ------------------------------------------------------------------
+// Model tier reference (mirrors assets/model_tiers.md — verify before quoting).
+// Costs are $/M tokens. Latency: first-token ms, tokens/sec range.
+// ------------------------------------------------------------------
+const TIERS = {
+  frontier: { inLow: 3,    inHigh: 15,   outLow: 15,   outHigh: 75,   ftLow: 400, ftHigh: 1500, tpsLow: 30,  tpsHigh: 80  },
+  mid:      { inLow: 0.5,  inHigh: 3,    outLow: 1.5,  outHigh: 15,   ftLow: 200, ftHigh: 800,  tpsLow: 60,  tpsHigh: 150 },
+  small:    { inLow: 0.05, inHigh: 0.5,  outLow: 0.15, outHigh: 2,    ftLow: 100, ftHigh: 400,  tpsLow: 100, tpsHigh: 300 },
+  open:     { inLow: 0.02, inHigh: 0.30, outLow: 0.05, outHigh: 0.60, ftLow: 50,  ftHigh: 500,  tpsLow: 50,  tpsHigh: 250 }
+};
+
+// Initial inputs (skill replaces __INITIAL_INPUTS__ with a JSON object; if not replaced, defaults are used).
+const INITIAL_INPUTS = (function () {
+  const placeholder = "__INITIAL_INPUTS__";
+  try {
+    if (placeholder.charAt(0) !== "_") {
+      return JSON.parse(placeholder);
+    }
+  } catch (e) {}
+  return null;
+})();
+
+const STORAGE_KEY = "cost-latency-budgeter:scenarios:v1";
+
+const els = {
+  featureName:  document.getElementById("featureName"),
+  dau:          document.getElementById("dau"),
+  callsPerUser: document.getElementById("callsPerUser"),
+  inputTokens:  document.getElementById("inputTokens"),
+  outputTokens: document.getElementById("outputTokens"),
+  tierRow:      document.getElementById("tierRow"),
+  cacheHit:     document.getElementById("cacheHit"),
+  cacheHitVal:  document.getElementById("cacheHitVal"),
+  batching:     document.getElementById("batching"),
+  batchingVal:  document.getElementById("batchingVal"),
+  retryRate:    document.getElementById("retryRate"),
+  retryVal:     document.getElementById("retryVal"),
+  threshold:    document.getElementById("threshold"),
+  thresholdVal: document.getElementById("thresholdVal"),
+  retrieval:    document.getElementById("retrieval"),
+  retrievalVal: document.getElementById("retrievalVal"),
+  network:      document.getElementById("network"),
+  networkVal:   document.getElementById("networkVal"),
+  banner:       document.getElementById("banner"),
+  kpiCall:      document.getElementById("kpiCall"),
+  kpiCallRange: document.getElementById("kpiCallRange"),
+  kpiUserMonth: document.getElementById("kpiUserMonth"),
+  kpiUserMonthRange: document.getElementById("kpiUserMonthRange"),
+  kpiLatency:   document.getElementById("kpiLatency"),
+  kpiTps:       document.getElementById("kpiTps"),
+  scaleBody:    document.getElementById("scaleBody"),
+  math:         document.getElementById("math"),
+  saveBtn:      document.getElementById("saveBtn"),
+  exportBtn:    document.getElementById("exportBtn"),
+  clearBtn:     document.getElementById("clearBtn"),
+  saved:        document.getElementById("saved")
+};
+
+let currentTier = "mid";
+
+function fmtUSD(n, dp) {
+  if (!isFinite(n)) return "—";
+  const opts = { style: "currency", currency: "USD", minimumFractionDigits: dp, maximumFractionDigits: dp };
+  return n.toLocaleString("en-US", opts);
+}
+
+function fmtInt(n) {
+  if (!isFinite(n)) return "—";
+  return Math.round(n).toLocaleString("en-US");
+}
+
+function readInputs() {
+  return {
+    feature:        els.featureName.value || "Untitled feature",
+    dau:            Math.max(0, +els.dau.value || 0),
+    callsPerUser:   Math.max(0, +els.callsPerUser.value || 0),
+    inputTokens:    Math.max(0, +els.inputTokens.value || 0),
+    outputTokens:   Math.max(0, +els.outputTokens.value || 0),
+    tier:           currentTier,
+    cacheHit:       (+els.cacheHit.value || 0) / 100,
+    batching:       Math.max(1, +els.batching.value || 1),
+    retryRate:      (+els.retryRate.value || 0) / 100,
+    threshold:      +els.threshold.value || 1,
+    retrieval:      +els.retrieval.value || 0,
+    network:        +els.network.value || 0
+  };
+}
+
+function compute(inp) {
+  const t = TIERS[inp.tier];
+  const effInput = inp.inputTokens * (1 - inp.cacheHit);
+
+  // Cost per call: lower-bound and upper-bound (plan-against).
+  const perCallLow  = (effInput / 1e6) * t.inLow  + (inp.outputTokens / 1e6) * t.outLow;
+  const perCallHigh = (effInput / 1e6) * t.inHigh + (inp.outputTokens / 1e6) * t.outHigh;
+
+  // Account for retries inflating effective call count.
+  const retryMult = 1 + inp.retryRate;
+
+  // Account for batching reducing requests per user-day.
+  const callsPerDay = inp.callsPerUser / Math.max(1, inp.batching);
+
+  const perUserDayLow  = perCallLow  * callsPerDay * retryMult;
+  const perUserDayHigh = perCallHigh * callsPerDay * retryMult;
+
+  const perUserMonthLow  = perUserDayLow  * 30;
+  const perUserMonthHigh = perUserDayHigh * 30;
+
+  const scaleTiers = [10000, 100000, 1000000];
+  const scaleRows = scaleTiers.map(n => ({
+    users: n,
+    monthlyLow:  perUserMonthLow  * n,
+    monthlyHigh: perUserMonthHigh * n
+  }));
+
+  // p95 latency stack.
+  const genMs = (inp.outputTokens / Math.max(1, t.tpsLow)) * 1000;
+  const baseLatency = inp.retrieval + t.ftHigh + genMs + inp.network;
+  const p95Latency  = baseLatency + inp.retryRate * baseLatency;
+
+  return {
+    perCallLow, perCallHigh,
+    perUserMonthLow, perUserMonthHigh,
+    scaleRows,
+    p95Latency,
+    tpsPlan: t.tpsLow,
+    tier: t,
+    effInput,
+    callsPerDay,
+    retryMult,
+    genMs,
+    baseLatency
+  };
+}
+
+function render() {
+  const inp = readInputs();
+  const out = compute(inp);
+
+  els.cacheHitVal.textContent = Math.round(inp.cacheHit * 100) + "%";
+  els.batchingVal.textContent = inp.batching + "x";
+  els.retryVal.textContent    = Math.round(inp.retryRate * 100) + "%";
+  els.thresholdVal.textContent = fmtUSD(inp.threshold, 2);
+  els.retrievalVal.textContent = inp.retrieval + " ms";
+  els.networkVal.textContent   = inp.network + " ms";
+
+  els.kpiCall.textContent      = fmtUSD(out.perCallHigh, 4);
+  els.kpiCallRange.textContent = "range " + fmtUSD(out.perCallLow, 4) + " – " + fmtUSD(out.perCallHigh, 4);
+  els.kpiUserMonth.textContent      = fmtUSD(out.perUserMonthHigh, 2);
+  els.kpiUserMonthRange.textContent = "range " + fmtUSD(out.perUserMonthLow, 2) + " – " + fmtUSD(out.perUserMonthHigh, 2);
+  els.kpiLatency.textContent   = fmtInt(out.p95Latency) + " ms";
+  els.kpiTps.textContent       = fmtInt(out.tpsPlan);
+
+  els.scaleBody.innerHTML = out.scaleRows.map(r => {
+    return "<tr><td>" + fmtInt(r.users) + "</td>"
+         + "<td>" + fmtUSD(r.monthlyHigh, 0) + "</td>"
+         + "<td>" + fmtUSD(r.monthlyHigh * 12, 0) + "</td></tr>";
+  }).join("");
+
+  els.math.textContent =
+    "per_call_cost (plan)  = (input × (1 - cache_hit) / 1M) × $" + inp.tier + ".in_high\n" +
+    "                       + (output / 1M) × $" + inp.tier + ".out_high\n" +
+    "                     = (" + fmtInt(inp.inputTokens) + " × " + (1 - inp.cacheHit).toFixed(2) +
+    " / 1M) × $" + out.tier.inHigh + " + (" + fmtInt(inp.outputTokens) + " / 1M) × $" + out.tier.outHigh + "\n" +
+    "                     = " + fmtUSD(out.perCallHigh, 4) + "\n\n" +
+    "per_user_month       = per_call × (calls/day ÷ batching) × (1 + retry) × 30\n" +
+    "                     = " + fmtUSD(out.perCallHigh, 4) + " × " + out.callsPerDay.toFixed(2) +
+    " × " + out.retryMult.toFixed(2) + " × 30\n" +
+    "                     = " + fmtUSD(out.perUserMonthHigh, 2) + "\n\n" +
+    "p95_latency_ms       = retrieval + first_token_high + (output / tps_low) × 1000 + network + retry × base\n" +
+    "                     = " + inp.retrieval + " + " + out.tier.ftHigh + " + " + fmtInt(out.genMs) +
+    " + " + inp.network + " + " + inp.retryRate.toFixed(2) + " × " + fmtInt(out.baseLatency) + "\n" +
+    "                     = " + fmtInt(out.p95Latency) + " ms";
+
+  // Banner
+  if (out.perUserMonthHigh > inp.threshold) {
+    els.banner.className = "banner bad";
+    els.banner.innerHTML = "<strong>⚠ Per-user-month cost " + fmtUSD(out.perUserMonthHigh, 2) +
+      " exceeds threshold " + fmtUSD(inp.threshold, 2) + ".</strong> " +
+      "If the feature's plausible LTV contribution is under this number, the unit economics do not clear. " +
+      "Tune the sliders — start with cache hit % or drop a tier.";
+  } else {
+    els.banner.className = "banner good";
+    els.banner.innerHTML = "<strong>Per-user-month cost " + fmtUSD(out.perUserMonthHigh, 2) +
+      " is within the configured threshold " + fmtUSD(inp.threshold, 2) + ".</strong> " +
+      "Validate the input assumptions (cache hit, calls/user/day) before quoting these numbers.";
+  }
+}
+
+// --- Tier picker ---
+els.tierRow.addEventListener("click", function (ev) {
+  const btn = ev.target.closest("button[data-tier]");
+  if (!btn) return;
+  currentTier = btn.dataset.tier;
+  for (const b of els.tierRow.querySelectorAll("button")) {
+    b.classList.toggle("active", b === btn);
+  }
+  render();
+});
+
+// --- Wire all inputs ---
+["input", "change"].forEach(ev => {
+  document.querySelectorAll("input").forEach(el => el.addEventListener(ev, render));
+});
+
+// --- Save / export / clear ---
+function loadSaved() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch (e) { return []; }
+}
+function writeSaved(arr) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+function renderSaved() {
+  const arr = loadSaved();
+  if (!arr.length) {
+    els.saved.innerHTML = "<em>No saved scenarios yet.</em>";
+    return;
+  }
+  els.saved.innerHTML = "<strong>Saved scenarios (localStorage):</strong><ul>" +
+    arr.map((s, i) => "<li><a data-idx=\"" + i + "\">" + (s.feature || "scenario " + (i + 1)) +
+      "</a> — " + fmtUSD(s.perUserMonthHigh, 2) + "/user/mo</li>").join("") + "</ul>";
+  els.saved.querySelectorAll("a[data-idx]").forEach(a => {
+    a.addEventListener("click", () => {
+      const s = loadSaved()[+a.dataset.idx];
+      if (!s) return;
+      els.featureName.value  = s.feature || "";
+      els.dau.value          = s.dau;
+      els.callsPerUser.value = s.callsPerUser;
+      els.inputTokens.value  = s.inputTokens;
+      els.outputTokens.value = s.outputTokens;
+      els.cacheHit.value     = Math.round((s.cacheHit || 0) * 100);
+      els.batching.value     = s.batching || 1;
+      els.retryRate.value    = Math.round((s.retryRate || 0) * 100);
+      els.threshold.value    = s.threshold || 1;
+      els.retrieval.value    = s.retrieval || 50;
+      els.network.value      = s.network || 100;
+      currentTier            = s.tier || "mid";
+      els.tierRow.querySelectorAll("button").forEach(b => {
+        b.classList.toggle("active", b.dataset.tier === currentTier);
+      });
+      render();
+    });
+  });
+}
+
+els.saveBtn.addEventListener("click", () => {
+  const inp = readInputs();
+  const out = compute(inp);
+  const snap = Object.assign({}, inp, {
+    perUserMonthHigh: out.perUserMonthHigh,
+    perUserMonthLow:  out.perUserMonthLow,
+    p95Latency:       out.p95Latency,
+    savedAt:          new Date().toISOString()
+  });
+  const arr = loadSaved();
+  arr.push(snap);
+  writeSaved(arr);
+  renderSaved();
+});
+
+els.exportBtn.addEventListener("click", () => {
+  const inp = readInputs();
+  const out = compute(inp);
+  const payload = {
+    feature: inp.feature,
+    generated_at: new Date().toISOString(),
+    inputs: inp,
+    outputs: {
+      per_call_cost_usd: { low: out.perCallLow, high: out.perCallHigh },
+      per_user_month_usd: { low: out.perUserMonthLow, high: out.perUserMonthHigh },
+      monthly_total_usd: {
+        "10k":  { low: out.scaleRows[0].monthlyLow, high: out.scaleRows[0].monthlyHigh },
+        "100k": { low: out.scaleRows[1].monthlyLow, high: out.scaleRows[1].monthlyHigh },
+        "1m":   { low: out.scaleRows[2].monthlyLow, high: out.scaleRows[2].monthlyHigh }
+      },
+      p95_latency_ms: out.p95Latency
+    },
+    model_tier_reference: "assets/model_tiers.md (verify before quoting)"
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "budget-" + (inp.feature || "scenario").replace(/[^a-z0-9]+/gi, "-").toLowerCase() + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+els.clearBtn.addEventListener("click", () => {
+  if (confirm("Clear all saved scenarios from localStorage?")) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderSaved();
+  }
+});
+
+// --- Apply initial inputs (from skill) ---
+function applyInitial(init) {
+  if (!init) return;
+  if (init.feature)        els.featureName.value  = init.feature;
+  if (init.dau != null)    els.dau.value          = init.dau;
+  if (init.callsPerUser != null)  els.callsPerUser.value  = init.callsPerUser;
+  if (init.inputTokens != null)   els.inputTokens.value   = init.inputTokens;
+  if (init.outputTokens != null)  els.outputTokens.value  = init.outputTokens;
+  if (init.cacheHit != null)      els.cacheHit.value      = Math.round(init.cacheHit * 100);
+  if (init.batching != null)      els.batching.value      = init.batching;
+  if (init.retryRate != null)     els.retryRate.value     = Math.round(init.retryRate * 100);
+  if (init.threshold != null)     els.threshold.value     = init.threshold;
+  if (init.retrieval != null)     els.retrieval.value     = init.retrieval;
+  if (init.network != null)       els.network.value       = init.network;
+  if (init.tier && TIERS[init.tier]) {
+    currentTier = init.tier;
+    els.tierRow.querySelectorAll("button").forEach(b => {
+      b.classList.toggle("active", b.dataset.tier === currentTier);
+    });
+  }
+}
+applyInitial(INITIAL_INPUTS);
+renderSaved();
+render();
+</script>
+</body>
+</html>
